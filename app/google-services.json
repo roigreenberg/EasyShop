@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "47082607920",
+    "firebase_url": "https://easyshop-23638.firebaseio.com",
+    "project_id": "easyshop-23638",
+    "storage_bucket": "easyshop-23638.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:47082607920:android:5d570d06e7efff59",
+        "android_client_info": {
+          "package_name": "com.roigreenberg.easyshop"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "47082607920-6kv43hcj4baf7eg3flb7q5q9duau2uql.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.roigreenberg.easyshop",
+            "certificate_hash": "882034e00d1ef0771d884d8f237be6012e3aa00d"
+          }
+        },
+        {
+          "client_id": "47082607920-q8em00bm655ia832jgpraijop66taq0m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAhtXBcDGLNFBqU0wS3PK9Y99UvvBPn1V0"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "47082607920-q8em00bm655ia832jgpraijop66taq0m.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
