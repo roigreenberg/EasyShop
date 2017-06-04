@@ -18,6 +18,9 @@ public class Item {
 
     private static final int MAX_IMAGES_QUANTITY = 5;
 
+    public Item() {
+    }
+
     public Item(String mID, String mName, String mBrand, String mWeight, String mVolume, String mBarcode, String[] mImage) {
         this.mID = mID;
         this.mName = mName;
