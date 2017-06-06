@@ -40,5 +40,17 @@ public class ItemHolder extends RecyclerView.ViewHolder {
         if (name != null)
             mVolume.setText(name);
     }
+
+    public void setNameSize(float size) {
+        mName.setTextSize(size + 5);
+    }
+
+    public void setBrandSize(Float size) {
+        mBrand.setTextSize(size);
+    }
+
+    public void setVolumeSize(Float size) {
+        mVolume.setTextSize(size);
+    }
     //public void setID(String name) { mListNameField.setText(name); }
 }

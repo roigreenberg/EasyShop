@@ -42,8 +42,9 @@ public class AddItemActivity extends AppCompatActivity {
 
         Toast.makeText(this, "add " + itemName + " " + itemBrand + " " + itemWeight, Toast.LENGTH_LONG).show();
 
-        Item item = new Item(null, itemName, itemBrand, itemWeight, null, null, null);
-        databaseReference.push().setValue(item);
+        DatabaseReference ref = databaseReference.push();
+        Item item = new Item(ref.getKey(), itemName, itemBrand, itemWeight, null, null, null);
+        ref.setValue(item);
 
         finish();
     }

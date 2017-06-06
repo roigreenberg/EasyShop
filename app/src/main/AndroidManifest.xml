@@ -15,10 +15,33 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="easyshop.roigreenberg.com"
+                    android:pathPrefix="/add_new_list"
+                    android:scheme="http" />
+                <data
+                    android:host="easyshop.roigreenberg.com"
+                    android:pathPrefix="/add_new_list"
+                    android:scheme="https" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".AddItemActivity"
-            android:label="@string/add_item_activity_name"></activity>
+            android:label="@string/add_item_activity_name" />
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
     </application>
 
 </manifest>
