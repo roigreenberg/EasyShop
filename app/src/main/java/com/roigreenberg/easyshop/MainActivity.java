@@ -117,9 +117,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 if (user != null){
                     onSignedInInitialize(user.getDisplayName());
 
-                    Log.d(TAG, "onAuthStateChanged:signed_in: " + user.getDisplayName() + " " + user.getUid());
-
-
                 } else {
                     onSignedOutCleanup();
                     startActivityForResult(
@@ -141,13 +138,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 new ResultCallback<AppInviteInvitationResult>() {
                     @Override
                     public void onResult(AppInviteInvitationResult result) {
-                        Log.d(TAG, "getInvitation:onResult:" + result.getStatus());
                         if (result.getStatus().isSuccess()) {
                             // Extract information from the intent
                             Intent intent = result.getInvitationIntent();
                             String deepLink = AppInviteReferral.getDeepLink(intent);
                             AppInviteReferral.getInvitationId(intent);
-                            Log.d("RROI", "0: " + deepLink);
 
                             // Because autoLaunchDeepLink = true we don't have to do anything
                             // here, but we could set that to false and manually choose
@@ -156,15 +151,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                             try {
                                 deepLink = URLDecoder.decode(deepLink, "UTF-8");
                             } catch (UnsupportedEncodingException e) {
-                                Log.d("RROI", "1: error");
                                 e.printStackTrace();
                             }
-                            Log.d("RROI", "1: " + deepLink);
                             Uri uri = Uri.parse(deepLink);
                             String userId = uri.getQueryParameter("UserId");
                             String linkId = uri.getQueryParameter("LinkId");
                             String linkName = uri.getQueryParameter("LinkName");
-                            Log.d("RROI", "1: " + "UserId= " + userId + "LinkId= " + linkId + "LinkName= " + linkName);
                             Toast.makeText(MainActivity.this, "UserId= " +userId + "LinkId= " + linkId + "LinkName= " + linkName, Toast.LENGTH_LONG).show();
 
 
@@ -246,7 +238,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                         itemHolder.setBrand(item.getBrand());
                         itemHolder.setWeight(item.getWeight());
                         itemHolder.setVolume(item.getVolume());
-                        Log.d("RROI", item.getID());
                         itemHolder.itemView.setTag(item.getID());
                         itemHolder.setNameSize(mTextSize);
                         itemHolder.setBrandSize(mTextSize);
@@ -311,6 +302,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 listHolder.setShareOnClick(new ShareOnClickListener(list.getUserID(), list.getListID(), list.getListName()));
 
                 list.setItemTouchHelper(listHolder, SHARED_LISTS);
+
             }
         };
 
@@ -376,7 +368,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 } else {
 
                     //add new item name to List
-                    DatabaseReference ref = mUserListsRef.push();
+                    DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("lists").push();
                     ref.setValue(new List(mUserID, ref.getKey(), editText.getText().toString().trim()));
 
 
@@ -487,7 +479,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         @Override
         public void onClick(View v)
         {
-            Log.d("RROI", "onClick ShareOnClick");
 
             Intent sendIntent = new Intent();
 

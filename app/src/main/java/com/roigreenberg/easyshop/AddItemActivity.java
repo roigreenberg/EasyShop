@@ -24,9 +24,7 @@ public class AddItemActivity extends AppCompatActivity {
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             String value = extras.getString("EXTRA_REF");
-            Log.d("ADD_ITEM", value);
             databaseReference = FirebaseDatabase.getInstance().getReference().child(value);
-            Log.d("ADD_ITEM", databaseReference.toString());
             //The key argument here must match that used in the other activity
         } else {
             return;

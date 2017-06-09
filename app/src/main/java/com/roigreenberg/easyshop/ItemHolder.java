@@ -1,5 +1,6 @@
 package com.roigreenberg.easyshop;
 
+import android.graphics.Paint;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
@@ -10,6 +11,7 @@ import android.widget.TextView;
 
 public class ItemHolder extends RecyclerView.ViewHolder {
 
+    public static final int BOUGHT = 0;
     //private final TextView mID;
     private final TextView mName;
     private final TextView mBrand;
@@ -43,6 +45,14 @@ public class ItemHolder extends RecyclerView.ViewHolder {
 
     public void setNameSize(float size) {
         mName.setTextSize(size + 5);
+    }
+
+    public void setNameCond(int cond) {
+
+        switch (cond) {
+            case (BOUGHT):
+                mName.setPaintFlags(mName.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);;
+        }
     }
 
     public void setBrandSize(Float size) {
