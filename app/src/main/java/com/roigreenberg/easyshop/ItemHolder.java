@@ -33,10 +33,21 @@ public class ItemHolder extends RecyclerView.ViewHolder {
     public void setName(String name) {
         mName.setText(name);
     }
-    public void setBrand(String name) { mBrand.setText(name); }
+    public void setBrand(String name) {
+        if (name == "")
+            mBrand.setVisibility(View.GONE);
+        else {
+            mBrand.setVisibility(View.VISIBLE);
+            mBrand.setText(name);
+        }
+    }
     public void setWeight(String name) {
-        if (name != null)
+        if (name == "")
+            mBrand.setVisibility(View.GONE);
+        else if (name != null) {
+            mWeight.setVisibility(View.VISIBLE);
             mWeight.setText(name);
+        }
     }
     public void setVolume(String name) {
         if (name != null)

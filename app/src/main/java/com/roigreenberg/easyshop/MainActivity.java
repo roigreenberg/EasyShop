@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -31,8 +30,11 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -48,7 +50,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private static final String ANONYMOUS = "anonymous";
     private static final String TAG = "EasyShop";
     private static final String LINK = "https://dwt9e.app.goo.gl/qL6j";
-    public static final String OWN_LISTS = "OwnLists";
+    public static final String ITEMS = "Items";
+    public static final String LISTS = "Lists";
+    public static final String USERS = "Users";
     public static final String SHARED_LISTS = "SharedLists";
     private RecyclerView mOwnListsRecyclerView, mSharedListsRecyclerView;
 
@@ -154,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                                 e.printStackTrace();
                             }
                             Uri uri = Uri.parse(deepLink);
-                            String userId = uri.getQueryParameter("UserId");
+                            String userId = uri.getQueryParameter("UserId"); //TODO is it needed?
                             String linkId = uri.getQueryParameter("LinkId");
                             String linkName = uri.getQueryParameter("LinkName");
                             Toast.makeText(MainActivity.this, "UserId= " +userId + "LinkId= " + linkId + "LinkName= " + linkName, Toast.LENGTH_LONG).show();
@@ -162,7 +166,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
                             //add new item name to List
                             DatabaseReference ref = mSharedListsRef.push();
-                            ref.setValue(new List(userId, linkId, linkName));
+                            ref.setValue(new List(linkId, linkName));
 
 
                             //update ListView adapter
@@ -174,7 +178,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         /*FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-        mUserListsRef = FirebaseDatabase.getInstance().getReference().child("Users").child(user.getUid()).child(OWN_LISTS);
+        mUserListsRef = FirebaseDatabase.getInstance().getReference().child("Users").child(user.getUid()).child(LISTS);
 
         mOwnListAdapter = new FirebaseRecyclerAdapter<List, ListHolder>(List.class, R.id.tv_list_name, ListHolder.class, mUserListsRef) {
             @Override
@@ -212,51 +216,96 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         mUserID = user.getUid();
 
         mUserListsRef = FirebaseDatabase.getInstance().getReference()
-                .child("Users")
+                .child(USERS)
                 .child(mUserID)
-                .child(OWN_LISTS);
+                .child(LISTS);
+
+        mUserItemsRef = FirebaseDatabase.getInstance().getReference()
+                .child(USERS)
+                .child(mUserID)
+                .child(ITEMS);
+
         Toast.makeText(this, "Set list adapter", Toast.LENGTH_SHORT).show();
-        mOwnListAdapter = new FirebaseRecyclerAdapter<List, ListHolder>(
-                List.class,
+        mOwnListAdapter = new FirebaseRecyclerAdapter<ListForUser, ListHolder>(
+                ListForUser.class,
                 R.layout.list,
                 ListHolder.class,
                 mUserListsRef) {
             @Override
-            protected void populateViewHolder(ListHolder listHolder, List list, int position) {
-                listHolder.setName(list.getListName());
-                listHolder.setNameSize(mTextSize);
+            protected void populateViewHolder(final ListHolder listHolder, ListForUser list, int position) {
 
-                mUserItemsRef = mUserListsRef.child(list.getListID()).child("list");
-                mOwnListAdapter = new FirebaseRecyclerAdapter<Item, ItemHolder>(
-                        Item.class,
-                        R.layout.item,
-                        ItemHolder.class,
-                        mUserItemsRef) {
+                final String listID = list.getListID();
+
+                final DatabaseReference listsRef = FirebaseDatabase.getInstance().getReference().child(LISTS).child(listID);
+
+                listsRef.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
-                    protected void populateViewHolder(ItemHolder itemHolder, Item item, int position) {
-                        itemHolder.setName(item.getName());
-                        itemHolder.setBrand(item.getBrand());
-                        itemHolder.setWeight(item.getWeight());
-                        itemHolder.setVolume(item.getVolume());
-                        itemHolder.itemView.setTag(item.getID());
-                        itemHolder.setNameSize(mTextSize);
-                        itemHolder.setBrandSize(mTextSize);
-                        itemHolder.setVolumeSize(mTextSize);
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        List listData = dataSnapshot.getValue(List.class);
+                        listHolder.setName(listData.getListName());
+                        listData.setItemTouchHelper(listHolder, LISTS);
+                        listHolder.setNameSize(mTextSize);
+                        listHolder.setShareOnClick(new ShareOnClickListener(mUserID, listID, listData.getListName()));
+
+                        FirebaseRecyclerAdapter listAdapter = new FirebaseRecyclerAdapter<ItemInList, ItemHolder>(
+                                ItemInList.class,
+                                R.layout.item,
+                                ItemHolder.class,
+                                listsRef.child(ITEMS)) {
+                            @Override
+                            protected void populateViewHolder(final ItemHolder itemHolder, ItemInList item, int position) {
+
+                                final String itemID = item.getItemID();
+
+                                DatabaseReference itemsRef = FirebaseDatabase.getInstance().getReference().child(ITEMS).child(itemID);
+
+                                itemsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        Item itemData = dataSnapshot.getValue(Item.class);
+                                        itemHolder.setName(itemData.getName());
+                                        itemHolder.setBrand(itemData.getBrand());
+                                        itemHolder.setWeight(itemData.getWeight());
+                                        itemHolder.setVolume(itemData.getVolume());
+                                        itemHolder.itemView.setTag(itemData.getID());
+                                        itemHolder.setNameSize(mTextSize);
+                                        itemHolder.setBrandSize(mTextSize);
+                                        itemHolder.setVolumeSize(mTextSize);
+                                    }
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+
+                                    }
+                                });
+
+
+                            }
+                        };
+
+                        listHolder.setListAdapter(listAdapter);
+
                     }
-                };
 
-                listHolder.setListAdapter(mOwnListAdapter);
-                listHolder.setAddItemOnClick(new AddItemOnClickListener(mUserItemsRef));
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
 
-                listHolder.setShareOnClick(new ShareOnClickListener(list.getUserID(), list.getListID(), list.getListName()));
+                    }
+                });
 
-                list.setItemTouchHelper(listHolder, OWN_LISTS);
+
+
+                listHolder.setAddItemOnClick(new AddItemOnClickListener(listsRef));
+
+
+
+
             }
         };
 
         mOwnListsRecyclerView.setAdapter(mOwnListAdapter);
 
-        mSharedListsRef = FirebaseDatabase.getInstance().getReference()
+/*        mSharedListsRef = FirebaseDatabase.getInstance().getReference()
                 .child("Users")
                 .child(mUserID)
                 .child(SHARED_LISTS);
@@ -274,7 +323,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 mSharedItemsRef = FirebaseDatabase.getInstance().getReference()
                         .child("Users")
                         .child(list.getUserID())
-                        .child(OWN_LISTS)
+                        .child(LISTS)
                         .child(list.getListID())
                         .child("list");
                 mSharedListAdapter = new FirebaseRecyclerAdapter<Item, ItemHolder>(
@@ -307,6 +356,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         };
 
         mSharedListsRecyclerView.setAdapter(mSharedListAdapter);
+        */
     }
 
     private void onSignedOutCleanup() {
@@ -368,8 +418,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 } else {
 
                     //add new item name to List
-                    DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("lists").push();
-                    ref.setValue(new List(mUserID, ref.getKey(), editText.getText().toString().trim()));
+                    DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child(LISTS).push();
+                    ref.setValue(new List(ref.getKey(), editText.getText().toString().trim()));
+                    ref.child(USERS).child(mUserID).setValue("admin");
+
+                    DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child(USERS).child(mUserID).child(LISTS).push();
+                    userRef.setValue(new ListForUser(ref.getKey()));
 
 
                     //update ListView adapter

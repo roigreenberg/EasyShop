@@ -47,7 +47,6 @@ public class ListHolder extends RecyclerView.ViewHolder {
     }
 
     public void setAddItemOnClick(View.OnClickListener onClick){
-        Log.d("RROI", "setAddItemOnClick");
         mImageButtonAddList.setOnClickListener(onClick);
     }
 

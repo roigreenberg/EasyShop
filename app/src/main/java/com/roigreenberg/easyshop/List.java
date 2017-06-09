@@ -1,25 +1,7 @@
 package com.roigreenberg.easyshop;
 
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.RectF;
-import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.Log;
-import android.view.View;
-
-import com.google.firebase.database.FirebaseDatabase;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-
-import static com.roigreenberg.easyshop.MainActivity.OWN_LISTS;
 
 /**
  * Created by Roi on 04/06/2017.
@@ -27,21 +9,17 @@ import static com.roigreenberg.easyshop.MainActivity.OWN_LISTS;
 
 public class List {
 
-    private String mUserID;
     private String mListID;
     private String mListName;
 
     public List() {
     }
 
-    public List(String mUserID, String mListID, String mListName) {
-        this.mUserID= mUserID;
+    public List(String mListID, String mListName) {
         this.mListID = mListID;
         this.mListName = mListName;
     }
-    public String getUserID() { return mUserID; }
 
-    public void setUserID(String mUserID) { this.mUserID = mUserID; }
 
     public String getListID() {
         return mListID;

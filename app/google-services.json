@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "47082607920-kf9t7uipube44q3i38jmt6u429tt71dp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.roigreenberg.easyshop",
+            "certificate_hash": "f985e791323cad8a93ebca1c5eff0651b6b4afbf"
+          }
+        },
+        {
           "client_id": "47082607920-6kv43hcj4baf7eg3flb7q5q9duau2uql.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
