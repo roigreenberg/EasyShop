@@ -55,4 +55,6 @@ public class ListHolder extends RecyclerView.ViewHolder {
     }
 
     public RecyclerView getListItemsRecyclerView() { return mListItemsRecyclerView; }
+
+
 }

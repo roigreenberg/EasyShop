@@ -15,8 +15,10 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.TextureView;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
@@ -71,9 +73,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private StorageReference mChatPhotosStorageReference;
     private FirebaseRemoteConfig mFirebaseRemoteConfig;
 
-    private DatabaseReference mUserListsRef, mSharedListsRef;
-    private DatabaseReference mUserItemsRef, mSharedItemsRef;
-    private FirebaseRecyclerAdapter mOwnListAdapter, mSharedListAdapter;
+    private DatabaseReference mUserListsRef;
+    private DatabaseReference mUserItemsRef;
+    private FirebaseRecyclerAdapter mOwnListAdapter;
     private GoogleApiClient mGoogleApiClient;
 
     @Override
@@ -91,19 +93,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         //mFirebaseStorage = FirebaseStorage.getInstance();
         //mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
 
-        mOwnListsRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_own_lists);
+        mOwnListsRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_lists);
         mOwnListsRecyclerView.setHasFixedSize(false);
         RecyclerView.LayoutManager ownLayoutManager = new LinearLayoutManager
                 (this, LinearLayoutManager.VERTICAL, false);
         ownLayoutManager.setAutoMeasureEnabled(true);
         mOwnListsRecyclerView.setLayoutManager(ownLayoutManager);
-
-        mSharedListsRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_shared_lists);
-        mSharedListsRecyclerView.setHasFixedSize(false);
-        RecyclerView.LayoutManager sharedLayoutManager = new LinearLayoutManager
-                (this, LinearLayoutManager.VERTICAL, false);
-        sharedLayoutManager.setAutoMeasureEnabled(true);
-        mSharedListsRecyclerView.setLayoutManager(sharedLayoutManager);
 
         // Create an auto-managed GoogleApiClient with access to App Invites.
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -159,15 +154,18 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                             }
                             Uri uri = Uri.parse(deepLink);
                             String userId = uri.getQueryParameter("UserId"); //TODO is it needed?
-                            String linkId = uri.getQueryParameter("LinkId");
+                            String linkId = uri.getQueryParameter("LinkId"); //TODO change name
                             String linkName = uri.getQueryParameter("LinkName");
                             Toast.makeText(MainActivity.this, "UserId= " +userId + "LinkId= " + linkId + "LinkName= " + linkName, Toast.LENGTH_LONG).show();
 
 
                             //add new item name to List
-                            DatabaseReference ref = mSharedListsRef.push();
-                            ref.setValue(new List(linkId, linkName));
+                            DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child(USERS).child(mUserID).child(LISTS).push();
+                            userRef.setValue(new ListForUser(linkId));
 
+                            DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child(LISTS).child(listID);
+                            ref.setValue(new List(ref.getKey(), editText.getText().toString().trim()));
+                            ref.child(USERS).child(mUserID).setValue("user");
 
                             //update ListView adapter
                             mSharedListAdapter.notifyDataSetChanged();
@@ -175,22 +173,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                         }
                     }
                 });
-
-        /*FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-
-        mUserListsRef = FirebaseDatabase.getInstance().getReference().child("Users").child(user.getUid()).child(LISTS);
-
-        mOwnListAdapter = new FirebaseRecyclerAdapter<List, ListHolder>(List.class, R.id.tv_list_name, ListHolder.class, mUserListsRef) {
-            @Override
-            protected void populateViewHolder(ListHolder listHolder, List list, int position) {
-                listHolder.setName(list.getListName());
-
-            }
-        };*/
-
-
-
-        //DatabaseReference mUserListsRef = FirebaseDatabase.getInstance().getReference().child("Users");
+                //DatabaseReference mUserListsRef = FirebaseDatabase.getInstance().getReference().child("Users");
         getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setupSharedPreferences();
     }
@@ -293,70 +276,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     }
                 });
 
-
-
                 listHolder.setAddItemOnClick(new AddItemOnClickListener(listsRef));
-
-
-
 
             }
         };
 
         mOwnListsRecyclerView.setAdapter(mOwnListAdapter);
 
-/*        mSharedListsRef = FirebaseDatabase.getInstance().getReference()
-                .child("Users")
-                .child(mUserID)
-                .child(SHARED_LISTS);
-        Toast.makeText(this, "Set list adapter", Toast.LENGTH_SHORT).show();
-        mSharedListAdapter = new FirebaseRecyclerAdapter<List, ListHolder>(
-                List.class,
-                R.layout.list,
-                ListHolder.class,
-                mSharedListsRef) {
-            @Override
-            protected void populateViewHolder(ListHolder listHolder, List list, int position) {
-                listHolder.setName(list.getListName());
-                listHolder.setNameSize(mTextSize);
-
-                mSharedItemsRef = FirebaseDatabase.getInstance().getReference()
-                        .child("Users")
-                        .child(list.getUserID())
-                        .child(LISTS)
-                        .child(list.getListID())
-                        .child("list");
-                mSharedListAdapter = new FirebaseRecyclerAdapter<Item, ItemHolder>(
-                        Item.class,
-                        R.layout.item,
-                        ItemHolder.class,
-                        mSharedItemsRef) {
-                    @Override
-                    protected void populateViewHolder(ItemHolder itemHolder, Item item, int position) {
-                        itemHolder.setName(item.getName());
-                        itemHolder.setBrand(item.getBrand());
-                        itemHolder.setWeight(item.getWeight());
-                        itemHolder.setVolume(item.getVolume());
-                        itemHolder.itemView.setTag(item.getID());
-                        itemHolder.setNameSize(mTextSize);
-                        itemHolder.setBrandSize(mTextSize);
-                        itemHolder.setVolumeSize(mTextSize);
-                    }
-                };
-
-                listHolder.setListAdapter(mSharedListAdapter);
-
-                listHolder.setAddItemOnClick(new AddItemOnClickListener(mSharedItemsRef));
-
-                listHolder.setShareOnClick(new ShareOnClickListener(list.getUserID(), list.getListID(), list.getListName()));
-
-                list.setItemTouchHelper(listHolder, SHARED_LISTS);
-
-            }
-        };
-
-        mSharedListsRecyclerView.setAdapter(mSharedListAdapter);
-        */
     }
 
     private void onSignedOutCleanup() {
@@ -559,5 +485,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         }
 
     };
+
+    public void onClickShowList(View view) {
+
+        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recyclerview_items);
+        if (recyclerView.getVisibility() == View.GONE)
+            recyclerView.setVisibility(View.VISIBLE);
+        else
+            recyclerView.setVisibility(View.GONE);
+
+    }
 
 }
