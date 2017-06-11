@@ -32,6 +32,15 @@ public class ListHolder extends RecyclerView.ViewHolder {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager
                 (itemView.getContext(), LinearLayoutManager.VERTICAL, false);
         mListItemsRecyclerView.setLayoutManager(layoutManager);
+        mListNameField.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mListItemsRecyclerView.getVisibility() == View.GONE)
+                    mListItemsRecyclerView.setVisibility(View.VISIBLE);
+                else
+                    mListItemsRecyclerView.setVisibility(View.GONE);
+            }
+        });
     }
 
     public void setName(String name) {
@@ -55,6 +64,5 @@ public class ListHolder extends RecyclerView.ViewHolder {
     }
 
     public RecyclerView getListItemsRecyclerView() { return mListItemsRecyclerView; }
-
 
 }

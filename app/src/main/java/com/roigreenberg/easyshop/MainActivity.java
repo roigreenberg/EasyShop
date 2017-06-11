@@ -153,22 +153,22 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                                 e.printStackTrace();
                             }
                             Uri uri = Uri.parse(deepLink);
-                            String userId = uri.getQueryParameter("UserId"); //TODO is it needed?
-                            String linkId = uri.getQueryParameter("LinkId"); //TODO change name
-                            String linkName = uri.getQueryParameter("LinkName");
-                            Toast.makeText(MainActivity.this, "UserId= " +userId + "LinkId= " + linkId + "LinkName= " + linkName, Toast.LENGTH_LONG).show();
+                            String userID = uri.getQueryParameter("UserId"); //TODO is it needed?
+                            String listID = uri.getQueryParameter("LinkId"); //TODO change name
+                            String listName = uri.getQueryParameter("LinkName");
+                            Toast.makeText(MainActivity.this, "UserId= " +userID + "LinkId= " + listID + "LinkName= " + listName, Toast.LENGTH_LONG).show();
 
 
                             //add new item name to List
                             DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child(USERS).child(mUserID).child(LISTS).push();
-                            userRef.setValue(new ListForUser(linkId));
+                            userRef.setValue(new ListForUser(listID));
 
                             DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child(LISTS).child(listID);
-                            ref.setValue(new List(ref.getKey(), editText.getText().toString().trim()));
+                            ref.setValue(new List(ref.getKey(), listName));
                             ref.child(USERS).child(mUserID).setValue("user");
 
                             //update ListView adapter
-                            mSharedListAdapter.notifyDataSetChanged();
+                            mOwnListAdapter.notifyDataSetChanged();
                             Toast.makeText(MainActivity.this, "Adding sucessful!", Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -410,8 +410,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 getString(R.string.pref_size_default)));
         if (mOwnListAdapter != null)
             mOwnListAdapter.notifyDataSetChanged();
-        if (mSharedListAdapter != null)
-            mSharedListAdapter.notifyDataSetChanged();
         //.setMinSizeScale(minSize);
     }
 
@@ -421,8 +419,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             mTextSize = Float.parseFloat(sharedPreferences.getString(getString(R.string.pref_size_key), "1.0"));
             if (mOwnListAdapter != null)
                 mOwnListAdapter.notifyDataSetChanged();
-            if (mSharedListAdapter != null)
-                mSharedListAdapter.notifyDataSetChanged();
         }
     }
 
@@ -485,15 +481,5 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         }
 
     };
-
-    public void onClickShowList(View view) {
-
-        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recyclerview_items);
-        if (recyclerView.getVisibility() == View.GONE)
-            recyclerView.setVisibility(View.VISIBLE);
-        else
-            recyclerView.setVisibility(View.GONE);
-
-    }
 
 }
