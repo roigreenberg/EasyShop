@@ -10,6 +10,8 @@ import android.widget.Toast;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import static com.roigreenberg.easyshop.MainActivity.ITEMS;
+
 public class AddItemActivity extends AppCompatActivity {
 
     @Override
@@ -24,9 +26,7 @@ public class AddItemActivity extends AppCompatActivity {
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             String value = extras.getString("EXTRA_REF");
-            Log.d("ADD_ITEM", value);
             databaseReference = FirebaseDatabase.getInstance().getReference().child(value);
-            Log.d("ADD_ITEM", databaseReference.toString());
             //The key argument here must match that used in the other activity
         } else {
             return;
@@ -42,9 +42,12 @@ public class AddItemActivity extends AppCompatActivity {
 
         Toast.makeText(this, "add " + itemName + " " + itemBrand + " " + itemWeight, Toast.LENGTH_LONG).show();
 
-        DatabaseReference ref = databaseReference.push();
-        Item item = new Item(ref.getKey(), itemName, itemBrand, itemWeight, null, null, null);
-        ref.setValue(item);
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child(ITEMS).push();
+        ref.setValue(new Item(ref.getKey(), itemName, itemBrand, itemWeight, null, null, null));
+        //ref.child(USERS).child(mUserID).setValue("admin");
+
+        DatabaseReference listRef = databaseReference.child(ITEMS).push();
+        listRef.setValue(new ItemInList(ref.getKey(), null, null, null));
 
         finish();
     }
