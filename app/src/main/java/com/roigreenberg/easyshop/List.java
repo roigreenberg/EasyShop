@@ -11,6 +11,7 @@ public class List {
 
     private String mListID;
     private String mListName;
+    public SelectionArray mSelectionArray;
 
     public List() {
     }

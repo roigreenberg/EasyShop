@@ -15,6 +15,7 @@ public class Item {
     private String mVolume;
     private String mBarcode;
     private String[] mImage;
+    private boolean mIsSelected;
 
     private static final int MAX_IMAGES_QUANTITY = 5;
 

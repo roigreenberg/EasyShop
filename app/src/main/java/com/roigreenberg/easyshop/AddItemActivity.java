@@ -11,6 +11,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import static com.roigreenberg.easyshop.MainActivity.ITEMS;
+import static com.roigreenberg.easyshop.MainActivity.mUsername;
 
 public class AddItemActivity extends AppCompatActivity {
 
@@ -47,7 +48,7 @@ public class AddItemActivity extends AppCompatActivity {
         //ref.child(USERS).child(mUserID).setValue("admin");
 
         DatabaseReference listRef = databaseReference.child(ITEMS).push();
-        listRef.setValue(new ItemInList(ref.getKey(), null, null, null));
+        listRef.setValue(new ItemInList(ref.getKey(), null, null, mUsername));
 
         finish();
     }

@@ -17,6 +17,7 @@ public class ItemHolder extends RecyclerView.ViewHolder {
     private final TextView mBrand;
     private final TextView mWeight;
     private final TextView mVolume;
+    private final TextView mAssignee;
     //private final TextView mBarcode;
     //private final TextView[] mImage;
 
@@ -28,6 +29,22 @@ public class ItemHolder extends RecyclerView.ViewHolder {
         this.mWeight = (TextView) itemView.findViewById(R.id.tv_item_weight_volume);
         this.mVolume = (TextView) itemView.findViewById(R.id.tv_item_weight_volume);
         //this.mBarcode = (TextView) itemView.findViewById(R.id.tv_list_name);
+        this.mAssignee = (TextView) itemView.findViewById(R.id.vt_item_assignee);
+    }
+
+    public void bindItem(Item item, String assignee, SelectionArray selectionArray, float textSize){
+        setName(item.getName());
+        setBrand(item.getBrand());
+        setWeight(item.getWeight());
+        setVolume(item.getVolume());
+        setAssignee(assignee);
+        itemView.setTag(item.getID());
+        setNameSize(textSize);
+        setBrandSize(textSize);
+        setVolumeSize(textSize);
+        setAssigneeSize(textSize);
+        itemView.setActivated(selectionArray.isSelected(getPosition()));
+        selectionArray.setSelectable(selectionArray.isSelectable());
     }
 
     public void setName(String name) {
@@ -54,6 +71,11 @@ public class ItemHolder extends RecyclerView.ViewHolder {
             mVolume.setText(name);
     }
 
+    public void setAssignee(String name) {
+        if (name != null)
+            mAssignee.setText(name);
+    }
+
     public void setNameSize(float size) {
         mName.setTextSize(size + 5);
     }
@@ -72,6 +94,10 @@ public class ItemHolder extends RecyclerView.ViewHolder {
 
     public void setVolumeSize(Float size) {
         mVolume.setTextSize(size);
+    }
+
+    public void setAssigneeSize(Float size) {
+        mAssignee.setTextSize(size);
     }
     //public void setID(String name) { mListNameField.setText(name); }
 }
