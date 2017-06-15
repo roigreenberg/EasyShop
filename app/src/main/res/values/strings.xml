@@ -21,6 +21,8 @@
 
     <!-- Default for size preference -->
     <string name="pref_size_default" translatable="false">15</string>
+    <string name="title_activity_list">ListActivity</string>
+    <string name="share_list">Share list</string>
 
 
 </resources>

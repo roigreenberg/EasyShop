@@ -1,5 +1,6 @@
 package com.roigreenberg.easyshop;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -60,9 +61,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private RecyclerView mOwnListsRecyclerView, mSharedListsRecyclerView;
 
     public static String mUsername;
-    private String mUserID;
+    public static String mUserID;
 
-    private Float mTextSize;
+    public Float mTextSize;
 
     // Firebase instance variables
     private FirebaseDatabase mFirebaseDatabase;
@@ -161,8 +162,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                             Uri uri = Uri.parse(deepLink);
                             String userID = uri.getQueryParameter("UserID"); //TODO is it needed?
                             String listID = uri.getQueryParameter("ListID"); //TODO change name
-                            String listName = uri.getQueryParameter("ListName");
-                            Toast.makeText(MainActivity.this, "UserID= " +userID + "ListID= " + listID + "ListName= " + listName, Toast.LENGTH_LONG).show();
+                            if (userID == null || listID == null)
+                                return;
+                            Toast.makeText(MainActivity.this, "UserID= " +userID + "ListID= " + listID, Toast.LENGTH_LONG).show();
 
 
                             //add new item name to List
@@ -179,7 +181,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     }
                 });
                 //DatabaseReference mUserListsRef = FirebaseDatabase.getInstance().getReference().child("Users");
-        getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
         setupSharedPreferences();
     }
 
@@ -233,40 +235,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         final List listData = dataSnapshot.getValue(List.class);
                         listHolder.setName(listData.getListName());
-                        listData.setItemTouchHelper(listHolder, LISTS);
                         listHolder.setNameSize(mTextSize);
                         listHolder.setShareOnClick(new ShareOnClickListener(mUserID, listID, listData.getListName()));
-
-                        FirebaseRecyclerAdapter listAdapter = new FirebaseRecyclerAdapter<ItemInList, ItemHolder>(
-                                ItemInList.class,
-                                R.layout.item,
-                                ItemHolder.class,
-                                listsRef.child(ITEMS)) {
+                        listHolder.mListNameField.setOnClickListener(new View.OnClickListener() {
                             @Override
-                            protected void populateViewHolder(final ItemHolder itemHolder, final ItemInList item, int position) {
-
-                                final String itemID = item.getItemID();
-
-                                DatabaseReference itemsRef = FirebaseDatabase.getInstance().getReference().child(ITEMS).child(itemID);
-
-                                itemsRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(DataSnapshot dataSnapshot) {
-                                        Item itemData = dataSnapshot.getValue(Item.class);
-                                        itemHolder.bindItem(itemData, item.getAssignee(), mTextSize);
-                                    }
-
-                                    @Override
-                                    public void onCancelled(DatabaseError databaseError) {
-
-                                    }
-                                });
-
-
+                            public void onClick(View v) {
+                                Intent ListIntent = new Intent(MainActivity.this, ListActivity.class);
+                                ListIntent.putExtra("EXTRA_REF", listID);
+                                startActivity(ListIntent);
                             }
-                        };
-
-                        listHolder.setListAdapter(listAdapter);
+                        });
 
                     }
 
@@ -275,8 +253,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
                     }
                 });
-
-                listHolder.setAddItemOnClick(new AddItemOnClickListener(listsRef));
 
             }
         };
@@ -456,32 +432,34 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         @Override
         public void onClick(View v)
         {
-
-            Intent sendIntent = new Intent();
-
-            Uri BASE_URI = Uri.parse("https://easyshop/roigreenberg.com/add_new_list");
-
-            Uri APP_URI = BASE_URI.buildUpon().appendQueryParameter("UserID", userId).
-                    appendQueryParameter("ListID", listId).
-                    appendQueryParameter("ListName", listName).build();
-
-
-            String encodedUri = null;
-            try {
-                encodedUri = URLEncoder.encode(APP_URI.toString(), "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-            Uri deepLink = Uri.parse("https://dwt9e.app.goo.gl/?link="+encodedUri+"&apn=com.roigreenberg.easyshop");
-
-            String msg = "Hey, check this out: " + deepLink.toString();
-            sendIntent.setAction(Intent.ACTION_SEND);
-            sendIntent.putExtra(Intent.EXTRA_TEXT, msg);
-            sendIntent.setType("text/plain");
-            startActivity(sendIntent);
+            ShareList(getBaseContext(), userId, listId);
         }
 
     };
+
+    public static void ShareList(Context context, String userId, String listId){
+        Intent sendIntent = new Intent();
+
+        Uri BASE_URI = Uri.parse("https://easyshop/roigreenberg.com/add_new_list");
+
+        Uri APP_URI = BASE_URI.buildUpon().appendQueryParameter("UserID", userId).
+                appendQueryParameter("ListID", listId).build();
+
+
+        String encodedUri = null;
+        try {
+            encodedUri = URLEncoder.encode(APP_URI.toString(), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        Uri deepLink = Uri.parse("https://dwt9e.app.goo.gl/?link="+encodedUri+"&apn=com.roigreenberg.easyshop");
+
+        String msg = "Hey, check this out: " + deepLink.toString();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_TEXT, msg);
+        sendIntent.setType("text/plain");
+        context.startActivity(sendIntent);
+    }
 
 
 
