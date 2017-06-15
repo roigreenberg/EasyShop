@@ -228,6 +228,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
                 final DatabaseReference listsRef = FirebaseDatabase.getInstance().getReference().child(LISTS).child(listID);
 
+
+
                 listsRef.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -236,6 +238,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                         listData.setItemTouchHelper(listHolder, LISTS);
                         listHolder.setNameSize(mTextSize);
                         listHolder.setShareOnClick(new ShareOnClickListener(mUserID, listID, listData.getListName()));
+
 
                         FirebaseRecyclerAdapter listAdapter = new FirebaseRecyclerAdapter<ItemInList, ItemHolder>(
                                 ItemInList.class,
@@ -253,7 +256,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                                     @Override
                                     public void onDataChange(DataSnapshot dataSnapshot) {
                                         Item itemData = dataSnapshot.getValue(Item.class);
-                                        itemHolder.bindItem(itemData, item.getAssignee(), listData.mSelectionArray, mTextSize);
+                                        itemHolder.bindItem(itemData, item.getAssignee(), mTextSize);
                                     }
 
                                     @Override
@@ -482,6 +485,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         }
 
     };
+
+
+
 
     /**
      * This method will make the View for the weather data visible and hide the error message and

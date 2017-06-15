@@ -3,13 +3,15 @@ package com.roigreenberg.easyshop;
 import android.graphics.Paint;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 
 /**
  * Created by Roi on 02/06/2017.
  */
 
-public class ItemHolder extends RecyclerView.ViewHolder {
+public class ItemHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener  {
 
     public static final int BOUGHT = 0;
     //private final TextView mID;
@@ -18,8 +20,10 @@ public class ItemHolder extends RecyclerView.ViewHolder {
     private final TextView mWeight;
     private final TextView mVolume;
     private final TextView mAssignee;
+    private final CheckBox mCheckBox;
     //private final TextView mBarcode;
     //private final TextView[] mImage;
+
 
     public ItemHolder(View itemView) {
         super(itemView);
@@ -29,10 +33,18 @@ public class ItemHolder extends RecyclerView.ViewHolder {
         this.mWeight = (TextView) itemView.findViewById(R.id.tv_item_weight_volume);
         this.mVolume = (TextView) itemView.findViewById(R.id.tv_item_weight_volume);
         //this.mBarcode = (TextView) itemView.findViewById(R.id.tv_list_name);
-        this.mAssignee = (TextView) itemView.findViewById(R.id.vt_item_assignee);
+        this.mAssignee = (TextView) itemView.findViewById(R.id.tv_item_assignee);
+        this.mCheckBox = (CheckBox) itemView.findViewById(R.id.tv_item_checkBox);
+        this.mCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+            }
+        });
+        itemView.setOnClickListener(this);
     }
 
-    public void bindItem(Item item, String assignee, SelectionArray selectionArray, float textSize){
+    public void bindItem(Item item, String assignee, float textSize){
         setName(item.getName());
         setBrand(item.getBrand());
         setWeight(item.getWeight());
@@ -43,9 +55,9 @@ public class ItemHolder extends RecyclerView.ViewHolder {
         setBrandSize(textSize);
         setVolumeSize(textSize);
         setAssigneeSize(textSize);
-        itemView.setActivated(selectionArray.isSelected(getPosition()));
-        selectionArray.setSelectable(selectionArray.isSelectable());
+
     }
+
 
     public void setName(String name) {
         mName.setText(name);
@@ -98,6 +110,38 @@ public class ItemHolder extends RecyclerView.ViewHolder {
 
     public void setAssigneeSize(Float size) {
         mAssignee.setTextSize(size);
+    }
+
+    public void setCheckBoxVisibility(boolean toVisible){
+        if (toVisible) {
+            mCheckBox.setVisibility(View.VISIBLE);
+        } else {
+            mCheckBox.setVisibility(View.GONE);
+        }
+    }
+
+    public boolean isCheckBoxVisibile(){
+        if (mCheckBox.getVisibility() == View.VISIBLE) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
+
+    public boolean isCheck(){
+        return mCheckBox.isChecked();
+    }
+
+    @Override
+    public void onClick(View v) {
+
+    }
+
+    @Override
+    public boolean onLongClick(View v) {
+        return false;
     }
     //public void setID(String name) { mListNameField.setText(name); }
 }
