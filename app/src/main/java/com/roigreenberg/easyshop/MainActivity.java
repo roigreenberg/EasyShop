@@ -18,6 +18,7 @@ import android.view.MenuItem;
 import android.view.TextureView;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -58,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     public static final String SHARED_LISTS = "SharedLists";
     private RecyclerView mOwnListsRecyclerView, mSharedListsRecyclerView;
 
-    private String mUsername;
+    public static String mUsername;
     private String mUserID;
 
     private Float mTextSize;
@@ -72,6 +73,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private FirebaseStorage mFirebaseStorage;
     private StorageReference mChatPhotosStorageReference;
     private FirebaseRemoteConfig mFirebaseRemoteConfig;
+
+    private ProgressBar mLoadingIndicator;
 
     private DatabaseReference mUserListsRef;
     private DatabaseReference mUserItemsRef;
@@ -92,6 +95,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         mFirebaseAuth = FirebaseAuth.getInstance();
         //mFirebaseStorage = FirebaseStorage.getInstance();
         //mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+
+        mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
 
         mOwnListsRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_lists);
         mOwnListsRecyclerView.setHasFixedSize(false);
@@ -114,6 +119,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null){
+                    mUsername = user.getDisplayName();
                     onSignedInInitialize(user.getDisplayName());
 
                 } else {
@@ -153,10 +159,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                                 e.printStackTrace();
                             }
                             Uri uri = Uri.parse(deepLink);
-                            String userID = uri.getQueryParameter("UserId"); //TODO is it needed?
-                            String listID = uri.getQueryParameter("LinkId"); //TODO change name
-                            String listName = uri.getQueryParameter("LinkName");
-                            Toast.makeText(MainActivity.this, "UserId= " +userID + "LinkId= " + listID + "LinkName= " + listName, Toast.LENGTH_LONG).show();
+                            String userID = uri.getQueryParameter("UserID"); //TODO is it needed?
+                            String listID = uri.getQueryParameter("ListID"); //TODO change name
+                            String listName = uri.getQueryParameter("ListName");
+                            Toast.makeText(MainActivity.this, "UserID= " +userID + "ListID= " + listID + "ListName= " + listName, Toast.LENGTH_LONG).show();
 
 
                             //add new item name to List
@@ -164,7 +170,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                             userRef.setValue(new ListForUser(listID));
 
                             DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child(LISTS).child(listID);
-                            ref.setValue(new List(ref.getKey(), listName));
                             ref.child(USERS).child(mUserID).setValue("user");
 
                             //update ListView adapter
@@ -194,6 +199,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     private void onSignedInInitialize(String username) {
+        showLoading();
+
         mUsername = username;
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         mUserID = user.getUid();
@@ -224,7 +231,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 listsRef.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        List listData = dataSnapshot.getValue(List.class);
+                        final List listData = dataSnapshot.getValue(List.class);
                         listHolder.setName(listData.getListName());
                         listData.setItemTouchHelper(listHolder, LISTS);
                         listHolder.setNameSize(mTextSize);
@@ -236,7 +243,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                                 ItemHolder.class,
                                 listsRef.child(ITEMS)) {
                             @Override
-                            protected void populateViewHolder(final ItemHolder itemHolder, ItemInList item, int position) {
+                            protected void populateViewHolder(final ItemHolder itemHolder, final ItemInList item, int position) {
 
                                 final String itemID = item.getItemID();
 
@@ -246,14 +253,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                                     @Override
                                     public void onDataChange(DataSnapshot dataSnapshot) {
                                         Item itemData = dataSnapshot.getValue(Item.class);
-                                        itemHolder.setName(itemData.getName());
-                                        itemHolder.setBrand(itemData.getBrand());
-                                        itemHolder.setWeight(itemData.getWeight());
-                                        itemHolder.setVolume(itemData.getVolume());
-                                        itemHolder.itemView.setTag(itemData.getID());
-                                        itemHolder.setNameSize(mTextSize);
-                                        itemHolder.setBrandSize(mTextSize);
-                                        itemHolder.setVolumeSize(mTextSize);
+                                        itemHolder.bindItem(itemData, item.getAssignee(), mTextSize);
                                     }
 
                                     @Override
@@ -282,6 +282,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         };
 
         mOwnListsRecyclerView.setAdapter(mOwnListAdapter);
+        showListDataView();
 
     }
 
@@ -460,9 +461,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
             Uri BASE_URI = Uri.parse("https://easyshop/roigreenberg.com/add_new_list");
 
-            Uri APP_URI = BASE_URI.buildUpon().appendQueryParameter("UserId", userId).
-                    appendQueryParameter("LinkId", listId).
-                    appendQueryParameter("LinkName", listName).build();
+            Uri APP_URI = BASE_URI.buildUpon().appendQueryParameter("UserID", userId).
+                    appendQueryParameter("ListID", listId).
+                    appendQueryParameter("ListName", listName).build();
 
 
             String encodedUri = null;
@@ -481,5 +482,38 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         }
 
     };
+
+
+
+
+    /**
+     * This method will make the View for the weather data visible and hide the error message and
+     * loading indicator.
+     * <p>
+     * Since it is okay to redundantly set the visibility of a View, we don't need to check whether
+     * each view is currently visible or invisible.
+     */
+    private void showListDataView() {
+        /* First, hide the loading indicator */
+        mLoadingIndicator.setVisibility(View.INVISIBLE);
+        /* Finally, make sure the weather data is visible */
+        mOwnListsRecyclerView.setVisibility(View.VISIBLE);
+    }
+
+    /**
+     * This method will make the loading indicator visible and hide the weather View and error
+     * message.
+     * <p>
+     * Since it is okay to redundantly set the visibility of a View, we don't need to check whether
+     * each view is currently visible or invisible.
+     */
+    private void showLoading() {
+        /* Then, hide the weather data */
+        mOwnListsRecyclerView.setVisibility(View.INVISIBLE);
+        /* Finally, show the loading indicator */
+        mLoadingIndicator.setVisibility(View.VISIBLE);
+    }
+
+
 
 }

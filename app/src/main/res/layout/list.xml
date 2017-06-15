@@ -17,14 +17,14 @@
         android:text="TextView"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="32dp"
-        android:layout_marginLeft="32dp"
+        android:layout_marginLeft="16dp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginStart="16dp"/>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerview_items"
-        android:layout_width="0dp"
+        android:layout_width="224dp"
         android:layout_height="wrap_content"
         android:clipToPadding="false"
         android:paddingBottom="8dp"
@@ -56,12 +56,10 @@
         android:contentDescription="@string/share"
         app:srcCompat="?attr/actionModeShareDrawable"
         app:layout_constraintTop_toTopOf="@+id/tv_list_name"
-        android:layout_marginTop="0dp"
         app:layout_constraintBottom_toBottomOf="@+id/tv_list_name"
-        android:layout_marginBottom="0dp"
         app:layout_constraintRight_toLeftOf="@+id/ib_add_item"
         app:layout_constraintEnd_toStartOf="@+id/ib_add_item"
-        android:layout_marginRight="8dp"
+        android:layout_marginRight="16dp"
         android:layout_marginEnd="16dp"
         />
 
