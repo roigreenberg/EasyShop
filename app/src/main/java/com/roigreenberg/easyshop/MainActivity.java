@@ -16,11 +16,9 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.TextureView;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
@@ -167,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                             Toast.makeText(MainActivity.this, "UserID= " +userID + "ListID= " + listID, Toast.LENGTH_LONG).show();
 
 
-                            //add new item name to List
+                            //add new item name to SList
                             DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child(USERS).child(mUserID).child(LISTS).push();
                             userRef.setValue(new ListForUser(listID));
 
@@ -233,7 +231,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 listsRef.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        final List listData = dataSnapshot.getValue(List.class);
+                        final SList listData = dataSnapshot.getValue(SList.class);
                         listHolder.setName(listData.getListName());
                         listHolder.setNameSize(mTextSize);
                         listHolder.setShareOnClick(new ShareOnClickListener(mUserID, listID, listData.getListName()));
@@ -311,8 +309,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         final EditText editText = (EditText) dialogView.findViewById(R.id.et_add_list);
 
-        dialogBuilder.setTitle("Adding new List");
-        dialogBuilder.setMessage("Input a List name");
+        dialogBuilder.setTitle("Adding new SList");
+        dialogBuilder.setMessage("Input a SList name");
 
         dialogBuilder.setPositiveButton("Done", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
@@ -320,9 +318,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     Toast.makeText(MainActivity.this, "Please input some texts!", Toast.LENGTH_SHORT).show();
                 } else {
 
-                    //add new item name to List
+                    //add new item name to SList
                     DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child(LISTS).push();
-                    ref.setValue(new List(ref.getKey(), editText.getText().toString().trim()));
+                    ref.setValue(new SList(ref.getKey(), editText.getText().toString().trim()));
                     ref.child(USERS).child(mUserID).setValue("admin");
 
                     DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child(USERS).child(mUserID).child(LISTS).push();

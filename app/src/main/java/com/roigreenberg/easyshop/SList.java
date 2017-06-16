@@ -7,15 +7,15 @@ import android.support.v7.widget.helper.ItemTouchHelper;
  * Created by Roi on 04/06/2017.
  */
 
-public class List {
+public class SList {
 
     private String mListID;
     private String mListName;
 
-    public List() {
+    public SList() {
     }
 
-    public List(String mListID, String mListName) {
+    public SList(String mListID, String mListName) {
         this.mListID = mListID;
         this.mListName = mListName;
     }
