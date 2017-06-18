@@ -2,6 +2,7 @@ package com.roigreenberg.easyshop;
 
 import android.graphics.Paint;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -93,6 +94,7 @@ public  class ItemAdapter extends SelectableItemAdapter {
 
 
         public void bindItem(Item item, String assignee, float textSize, boolean isSelected){
+            Log.d("RROI", "" + item.getName());
             setName(item.getName());
             setBrand(item.getBrand());
             setWeight(item.getWeight());

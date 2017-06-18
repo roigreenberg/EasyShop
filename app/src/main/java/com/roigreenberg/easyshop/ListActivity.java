@@ -15,6 +15,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -56,7 +57,7 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
         }
 
         getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         listRef = FirebaseDatabase.getInstance().getReference().child(LISTS).child(listID);
         itemAdapter = new ItemAdapter(listRef.child(ITEMS), this);
 
@@ -210,6 +211,13 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
             switch (item.getItemId()) {
                 case R.id.menu_remove:
                     // TODO: actually remove items
+                    for (int i = mRecyclerView.getAdapter().getItemCount() - 1; i >= 0; i--) {
+                        ItemAdapter.ItemHolder itemHolder = (ItemAdapter.ItemHolder) mRecyclerView.findViewHolderForAdapterPosition(i);
+                        if (((ItemAdapter) mRecyclerView.getAdapter()).isSelected(i)){
+
+                            ((ItemAdapter) mRecyclerView.getAdapter()).getRef(i).setValue(null);
+                        }
+                    }
                     Log.d(TAG, "menu_remove");
                     mode.finish();
                     return true;
