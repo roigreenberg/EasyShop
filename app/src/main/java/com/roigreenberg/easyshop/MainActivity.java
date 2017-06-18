@@ -112,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 
         //DatabaseReference mUserListsRef = FirebaseDatabase.getInstance().getReference().child("Users");
-
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         mAuthStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
