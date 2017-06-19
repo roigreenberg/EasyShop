@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -64,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     public Float mTextSize;
 
     // Firebase instance variables
-    private FirebaseDatabase mFirebaseDatabase;
+    private static FirebaseDatabase mFirebaseDatabase = null;
     private DatabaseReference mMessagesDatabaseReference;
     private ChildEventListener mChildEventListener;
     private FirebaseAuth mFirebaseAuth;
@@ -84,13 +85,17 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         mUsername = ANONYMOUS;
 
         mTextSize = Float.parseFloat(getString(R.string.pref_size_default));
 
+        if (mFirebaseDatabase == null) {
+            Toast.makeText(this, "here", Toast.LENGTH_LONG);
+            FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+            mFirebaseDatabase = FirebaseDatabase.getInstance();
+        }
         // Initialize Firebase components
-        mFirebaseDatabase = FirebaseDatabase.getInstance();
+
         mFirebaseAuth = FirebaseAuth.getInstance();
         //mFirebaseStorage = FirebaseStorage.getInstance();
         //mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
@@ -119,7 +124,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null){
                     mUsername = user.getDisplayName();
-                    onSignedInInitialize(user.getDisplayName());
+                    Log.d("RROI", mUsername);
+                    onSignedInInitialize();
 
                 } else {
                     onSignedOutCleanup();
@@ -198,12 +204,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         }
     }
 
-    private void onSignedInInitialize(String username) {
+    private void onSignedInInitialize() {
         showLoading();
 
-        mUsername = username;
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         mUserID = user.getUid();
+
+        FirebaseDatabase.getInstance().getReference().child(USERS).child(mUserID).child("Name").setValue(mUsername);
 
         mUserListsRef = FirebaseDatabase.getInstance().getReference()
                 .child(USERS)
@@ -361,7 +368,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mOwnListAdapter.cleanup();
+        if (mOwnListAdapter != null)
+            mOwnListAdapter.cleanup();
         PreferenceManager.getDefaultSharedPreferences(this)
                 .unregisterOnSharedPreferenceChangeListener(this);
     }

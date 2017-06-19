@@ -57,7 +57,7 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
         }
 
         getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+        //FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         listRef = FirebaseDatabase.getInstance().getReference().child(LISTS).child(listID);
         itemAdapter = new ItemAdapter(listRef.child(ITEMS), this);
 
