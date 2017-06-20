@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     // Firebase instance variables
     private static FirebaseDatabase mFirebaseDatabase = null;
-    private DatabaseReference mMessagesDatabaseReference;
+    private static DatabaseReference mDatabaseReference;
     private ChildEventListener mChildEventListener;
     private FirebaseAuth mFirebaseAuth;
     private FirebaseAuth.AuthStateListener mAuthStateListener;
@@ -93,6 +93,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             Toast.makeText(this, "here", Toast.LENGTH_LONG);
             FirebaseDatabase.getInstance().setPersistenceEnabled(true);
             mFirebaseDatabase = FirebaseDatabase.getInstance();
+            mDatabaseReference = mFirebaseDatabase.getReference();
         }
         // Initialize Firebase components
 
@@ -172,10 +173,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 
                             //add new item name to SList
-                            DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child(USERS).child(mUserID).child(LISTS).push();
+                            DatabaseReference userRef = mDatabaseReference.child(USERS).child(mUserID).child(LISTS).push();
                             userRef.setValue(new ListForUser(listID));
 
-                            DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child(LISTS).child(listID);
+                            DatabaseReference ref = mDatabaseReference.child(LISTS).child(listID);
                             ref.child(USERS).child(mUserID).setValue("user");
 
                             //update ListView adapter
@@ -210,14 +211,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         mUserID = user.getUid();
 
-        FirebaseDatabase.getInstance().getReference().child(USERS).child(mUserID).child("Name").setValue(mUsername);
+        mDatabaseReference.child(USERS).child(mUserID).child("Name").setValue(mUsername);
 
-        mUserListsRef = FirebaseDatabase.getInstance().getReference()
+        mUserListsRef = mDatabaseReference
                 .child(USERS)
                 .child(mUserID)
                 .child(LISTS);
 
-        mUserItemsRef = FirebaseDatabase.getInstance().getReference()
+        mUserItemsRef = mDatabaseReference
                 .child(USERS)
                 .child(mUserID)
                 .child(ITEMS);
@@ -233,7 +234,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
                 final String listID = list.getListID();
 
-                final DatabaseReference listsRef = FirebaseDatabase.getInstance().getReference().child(LISTS).child(listID);
+                final DatabaseReference listsRef = mDatabaseReference.child(LISTS).child(listID);
 
                 listsRef.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
@@ -326,11 +327,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 } else {
 
                     //add new item name to SList
-                    DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child(LISTS).push();
+                    DatabaseReference ref = mDatabaseReference.child(LISTS).push();
                     ref.setValue(new SList(ref.getKey(), editText.getText().toString().trim()));
                     ref.child(USERS).child(mUserID).setValue("admin");
 
-                    DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child(USERS).child(mUserID).child(LISTS).push();
+                    DatabaseReference userRef = mDatabaseReference.child(USERS).child(mUserID).child(LISTS).push();
                     userRef.setValue(new ListForUser(ref.getKey()));
 
 
@@ -418,7 +419,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         {
             Intent addItemIntent = new Intent(MainActivity.this, AddItemActivity.class);
             addItemIntent.putExtra("EXTRA_REF", ref.toString().substring(
-                    FirebaseDatabase.getInstance().getReference().toString().length()));
+                    mDatabaseReference.toString().length()));
             startActivity(addItemIntent);
         }
 

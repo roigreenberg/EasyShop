@@ -3,6 +3,7 @@ package com.roigreenberg.easyshop;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
@@ -14,6 +15,10 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.database.DataSnapshot;
@@ -22,9 +27,13 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.roigreenberg.easyshop.MainActivity.ITEMS;
 import static com.roigreenberg.easyshop.MainActivity.LISTS;
 import static com.roigreenberg.easyshop.MainActivity.ShareList;
+import static com.roigreenberg.easyshop.MainActivity.USERS;
 import static com.roigreenberg.easyshop.MainActivity.mUserID;
 
 public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemHolder.ClickListener{
@@ -126,6 +135,7 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.list_menu, menu);
+        
         return true;
     }
 
@@ -196,8 +206,73 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
         private final String TAG = ActionModeCallback.class.getSimpleName();
 
         @Override
-        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+        public boolean onCreateActionMode(final ActionMode mode, Menu menu) {
             mode.getMenuInflater().inflate (R.menu.selected_menu, menu);
+            Log.d(TAG, listRef.child(USERS).toString());
+            listRef.child(USERS).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    Toast.makeText(ListActivity.this, dataSnapshot.getKey().toString(),Toast.LENGTH_LONG);
+                    // Is better to use a List, because you don't know the size
+                    // of the iterator returned by dataSnapshot.getChildren() to
+                    // initialize the array
+                    final List<String> users = new ArrayList<String>();
+
+                    final DatabaseReference usersDatabaseReference = FirebaseDatabase.getInstance().getReference().child(USERS);
+
+                    for (DataSnapshot userSnapshot: dataSnapshot.getChildren()) {
+                        //String userName = userSnapshot.child("Name").getValue(String.class);
+                        String userID = userSnapshot.getKey();
+                        Log.d("RROI", userID);
+                        usersDatabaseReference.child(userID).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                String userName = dataSnapshot.child("Name").getValue(String.class);
+                                if (userName != null) {
+                                    Log.d("RROI", userName);
+                                    users.add(userName);
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
+                    Spinner userSpinner = (Spinner) findViewById(R.id.menu_users_spinner);
+                    userSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                            for (int i = mRecyclerView.getAdapter().getItemCount() - 1; i >= 0; i--) {
+                                ItemAdapter.ItemHolder itemHolder = (ItemAdapter.ItemHolder) mRecyclerView.findViewHolderForAdapterPosition(i);
+                                if (((ItemAdapter) mRecyclerView.getAdapter()).isSelected(i)){
+
+                                    Log.d("RROI", ((ItemAdapter) mRecyclerView.getAdapter()).getRef(i).toString());
+                                }
+                            }
+                            Log.d(TAG, "menu_spinner");
+                            mode.finish();
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> parent) {
+
+                        }
+                    });
+
+                    ArrayAdapter<String> usersAdapter = new ArrayAdapter<String>(ListActivity.this, android.R.layout.simple_spinner_item, users);
+                    usersAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    userSpinner.setAdapter(usersAdapter);
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
             return true;
         }
 

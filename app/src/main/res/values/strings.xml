@@ -24,5 +24,7 @@
     <string name="title_activity_list">ListActivity</string>
     <string name="share_list">Share list</string>
 
+    <string name="assign_to">Assign to</string>
+
 
 </resources>

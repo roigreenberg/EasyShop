@@ -16,6 +16,7 @@
     <!-- Label for the size preference -->
     <string name="pref_size_label">גודל</string>
 
+    <string name="assign_to">הקצאה</string>
 
 
 </resources>
