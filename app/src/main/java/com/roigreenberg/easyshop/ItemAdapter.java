@@ -12,6 +12,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.lang.reflect.Constructor;
@@ -27,11 +28,11 @@ public  class ItemAdapter extends SelectableItemAdapter {
 
     private ItemHolder.ClickListener clickListener;
 
-    public ItemAdapter(DatabaseReference ref, ItemHolder.ClickListener clickListener) {
+    public ItemAdapter(Query query, ItemHolder.ClickListener clickListener) {
         super(ItemInList.class,
                 R.layout.item,
                 ItemAdapter.ItemHolder.class,
-                ref);
+                query);
         this.clickListener = clickListener;
     }
 
@@ -107,6 +108,7 @@ public  class ItemAdapter extends SelectableItemAdapter {
             setAssigneeSize(textSize);
             if (isSelected)
                 setWeight("Chosen");
+
 
         }
 

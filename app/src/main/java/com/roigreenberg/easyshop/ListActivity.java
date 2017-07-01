@@ -25,6 +25,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -40,6 +41,7 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
 
     private RecyclerView mRecyclerView;
     private DatabaseReference listRef;
+    private Query query;
     private ItemAdapter itemAdapter;
     private ActionModeCallback actionModeCallback = new ActionModeCallback();
     private ActionMode actionMode;
@@ -68,7 +70,7 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
         getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         //FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         listRef = FirebaseDatabase.getInstance().getReference().child(LISTS).child(listID);
-        itemAdapter = new ItemAdapter(listRef.child(ITEMS), this);
+        itemAdapter = new ItemAdapter(listRef.child(ITEMS).orderByChild("name"), this);
 
         mRecyclerView.setAdapter(itemAdapter);
         listRef.addListenerForSingleValueEvent(new ValueEventListener() {

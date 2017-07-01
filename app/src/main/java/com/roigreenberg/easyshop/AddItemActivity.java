@@ -48,7 +48,7 @@ public class AddItemActivity extends AppCompatActivity {
         //ref.child(USERS).child(mUserID).setValue("admin");
 
         DatabaseReference listRef = databaseReference.child(ITEMS).push();
-        listRef.setValue(new ItemInList(ref.getKey(), null, null, mUsername));
+        listRef.setValue(new ItemInList(ref.getKey(), null, null, mUsername, itemName));
 
         finish();
     }

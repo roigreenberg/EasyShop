@@ -5,6 +5,7 @@ import android.util.SparseBooleanArray;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Query;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,8 +21,8 @@ public abstract class SelectableItemAdapter extends FirebaseRecyclerAdapter<Item
     private SparseBooleanArray selectedItems;
 
 
-    public SelectableItemAdapter(Class<ItemInList> modelClass, int modelLayout, Class<ItemAdapter.ItemHolder> viewHolderClass, DatabaseReference ref) {
-        super(modelClass, modelLayout, viewHolderClass, ref);
+    public SelectableItemAdapter(Class<ItemInList> modelClass, int modelLayout, Class<ItemAdapter.ItemHolder> viewHolderClass, Query query) {
+        super(modelClass, modelLayout, viewHolderClass, query);
         selectedItems = new SparseBooleanArray();
     }
 
