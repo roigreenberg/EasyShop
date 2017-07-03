@@ -3,8 +3,10 @@ package com.roigreenberg.easyshop;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import com.google.firebase.database.DatabaseReference;
@@ -19,6 +21,20 @@ public class AddItemActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_item);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Switch switch_extra = (Switch) findViewById(R.id.switch_extra_details);
+        switch_extra.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                int action = event.getActionMasked();
+                Log.d("RROI", String.valueOf(action));
+                return true;
+            }
+        });
     }
 
     public void onClickAddItem(View view) {
@@ -51,5 +67,8 @@ public class AddItemActivity extends AppCompatActivity {
         listRef.setValue(new ItemInList(ref.getKey(), null, null, mUsername, itemName));
 
         finish();
+    }
+
+    public void onClickSwitchExtraDetails(View view) {
     }
 }

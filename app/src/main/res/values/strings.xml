@@ -21,10 +21,11 @@
 
     <!-- Default for size preference -->
     <string name="pref_size_default" translatable="false">15</string>
-    <string name="title_activity_list">ListActivity</string>
-    <string name="share_list">Share list</string>
+    <string name="title_activity_list" translatable="false">ListActivity</string>
+    <string name="share_list" translatable="false">Share list</string>
 
     <string name="assign_to">Assign to</string>
+    <string name="switch_extra_details_text">Extra details</string>
 
 
 </resources>
