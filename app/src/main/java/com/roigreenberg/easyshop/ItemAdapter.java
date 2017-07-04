@@ -52,7 +52,7 @@ public  class ItemAdapter extends SelectableItemAdapter {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Item itemData = dataSnapshot.getValue(Item.class);
-                itemHolder.bindItem(itemData, item.getAssignee(), /*mTextSize*/15, isSelected(position));
+                itemHolder.bindItem(itemData, item, /*mTextSize*/15, isSelected(position));
             }
 
             @Override
@@ -71,6 +71,7 @@ public  class ItemAdapter extends SelectableItemAdapter {
         private final TextView mWeight;
         private final TextView mVolume;
         private final TextView mAssignee;
+        private final TextView mQuantity;
         //private final TextView mBarcode;
         //private final TextView[] mImage;
 
@@ -85,6 +86,7 @@ public  class ItemAdapter extends SelectableItemAdapter {
             this.mVolume = (TextView) itemView.findViewById(R.id.tv_item_weight_volume);
             //this.mBarcode = (TextView) itemView.findViewById(R.id.tv_list_name);
             this.mAssignee = (TextView) itemView.findViewById(R.id.tv_item_assignee);
+            this.mQuantity = (TextView) itemView.findViewById(R.id.tv_item_quantity);
 
             this.mClickListener = listener;
 
@@ -94,13 +96,14 @@ public  class ItemAdapter extends SelectableItemAdapter {
 
 
 
-        public void bindItem(Item item, String assignee, float textSize, boolean isSelected){
+        public void bindItem(Item item, ItemInList itemInList, float textSize, boolean isSelected){
             Log.d("RROI", "" + item.getName());
             setName(item.getName());
             setBrand(item.getBrand());
             setWeight(item.getWeight());
             setVolume(item.getVolume());
-            setAssignee(assignee);
+            setAssignee(itemInList.getAssignee());
+            setQuantity(itemInList.getQuantity());
             itemView.setTag(item.getID());
             setNameSize(textSize);
             setBrandSize(textSize);
@@ -113,33 +116,40 @@ public  class ItemAdapter extends SelectableItemAdapter {
         }
 
 
-        public void setName(String name) {
-            mName.setText(name);
+        public void setName(String value) {
+            mName.setText(value);
         }
-        public void setBrand(String name) {
-            if (name == "")
+        public void setBrand(String value) {
+            if (value == null ||value == "")
                 mBrand.setVisibility(View.GONE);
             else {
                 mBrand.setVisibility(View.VISIBLE);
-                mBrand.setText(name);
+                mBrand.setText(value);
             }
         }
-        public void setWeight(String name) {
-            if (name == "")
-                mBrand.setVisibility(View.GONE);
-            else if (name != null) {
+        public void setWeight(String value) {
+            if (value == null || value == "")
+                mWeight.setVisibility(View.GONE);
+            else if (value != null) {
                 mWeight.setVisibility(View.VISIBLE);
-                mWeight.setText(name);
+                mWeight.setText(value);
             }
         }
-        public void setVolume(String name) {
-            if (name != null)
-                mVolume.setText(name);
+        public void setVolume(String value) {
+            if (value != null)
+                mVolume.setText(value);
         }
 
-        public void setAssignee(String name) {
-            if (name != null)
-                mAssignee.setText(name);
+        public void setAssignee(String value) {
+            if (value != null)
+                mAssignee.setText(value);
+        }
+
+        public void setQuantity(String value) {
+            if (value != null)
+                mQuantity.setText(value);
+            else
+                mQuantity.setText("1");
         }
 
         public void setNameSize(float size) {

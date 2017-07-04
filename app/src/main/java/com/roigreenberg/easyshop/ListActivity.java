@@ -3,7 +3,6 @@ package com.roigreenberg.easyshop;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
@@ -20,7 +19,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -52,7 +50,7 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
         setContentView(R.layout.activity_list);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_items_2);
+        mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_items);
         mRecyclerView.setHasFixedSize(false);
         RecyclerView.LayoutManager ownLayoutManager = new LinearLayoutManager
                 (this, LinearLayoutManager.VERTICAL, false);

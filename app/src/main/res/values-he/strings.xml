@@ -17,7 +17,7 @@
     <string name="pref_size_label">גודל</string>
 
     <string name="assign_to">הקצאה</string>
-    <string name="switch_extra_details_text">פרטים נוספים..</string>
+    <string name="add_item_extra_details_text">פרטים נוספים..</string>
 
 
 </resources>
