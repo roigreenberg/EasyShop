@@ -5,7 +5,6 @@
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -44,11 +43,13 @@
         <ImageView
             android:id="@+id/ib_add_item_extra_details"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="0"
-            app:srcCompat="@android:drawable/arrow_down_float" />
+            app:srcCompat="@android:drawable/arrow_down_float"
+            android:contentDescription="@string/Extra_details"/>
 
     </LinearLayout>
+
 
     <include layout="@layout/activity_add_item_extra_details"
         android:id="@+id/add_item_extra_details"

@@ -3,9 +3,12 @@ package com.roigreenberg.easyshop;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Layout;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -47,6 +50,9 @@ public class AddItemActivity extends AppCompatActivity {
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             String value = extras.getString("EXTRA_REF");
+            if (value == null)
+                return;
+
             databaseReference = FirebaseDatabase.getInstance().getReference().child(value);
             //The key argument here must match that used in the other activity
         } else {
@@ -83,11 +89,12 @@ public class AddItemActivity extends AppCompatActivity {
         if (showExtraDetails) {
             showExtraDetails = false;
             ((ImageView) view.findViewById(R.id.ib_add_item_extra_details)).setImageResource(android.R.drawable.arrow_down_float);
-            ((LinearLayout) view.findViewById(R.id.add_item_extra_details)).setVisibility(View.GONE);
+            this.findViewById(R.id.add_item_extra_details).setVisibility(View.GONE);
         } else {
             showExtraDetails = true;
             ((ImageView) view.findViewById(R.id.ib_add_item_extra_details)).setImageResource(android.R.drawable.arrow_up_float);
-            ((LinearLayout) view.findViewById(R.id.add_item_extra_details)).setVisibility(View.VISIBLE);
+            this.findViewById(R.id.add_item_extra_details).setVisibility(View.VISIBLE);
+
         }
     }
 }
