@@ -17,6 +17,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
@@ -43,6 +44,7 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
     private ItemAdapter itemAdapter;
     private ActionModeCallback actionModeCallback = new ActionModeCallback();
     private ActionMode actionMode;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -19,6 +19,8 @@
     <string name="assign_to">הקצאה</string>
     <string name="add_item_extra_details_text">פרטים נוספים..</string>
     <string name="Extra_details">פרטים נוספים</string>
+    <string name="tv_expand_extra_details">פרטים נוספים..</string>
+    <string name="tv_collaps_extra_details">סגור..</string>
 
 
 </resources>

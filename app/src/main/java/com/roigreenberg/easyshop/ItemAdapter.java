@@ -74,10 +74,12 @@ public  class ItemAdapter extends SelectableItemAdapter {
         private final TextView mQuantity;
         //private final TextView mBarcode;
         //private final TextView[] mImage;
+        private final TextView mExtraDetails;
+        private static boolean showExtraDetails = false;
 
         private ClickListener mClickListener;
 
-        public ItemHolder(View itemView, ClickListener listener) {
+        public ItemHolder(final View itemView, ClickListener listener) {
             super(itemView);
             //this.mID = (TextView) itemView.findViewById(R.id.tv_list_name);
             this.mName = (TextView) itemView.findViewById(R.id.tv_item_name);
@@ -87,6 +89,22 @@ public  class ItemAdapter extends SelectableItemAdapter {
             //this.mBarcode = (TextView) itemView.findViewById(R.id.tv_list_name);
             this.mAssignee = (TextView) itemView.findViewById(R.id.tv_item_assignee);
             this.mQuantity = (TextView) itemView.findViewById(R.id.tv_item_quantity);
+            this.mExtraDetails = (TextView) itemView.findViewById(R.id.tv_item_extra_details);
+            this.mExtraDetails.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (showExtraDetails) {
+                        showExtraDetails = false;
+                        mExtraDetails.setText(R.string.tv_expand_extra_details);
+                        itemView.findViewById(R.id.extra_details).setVisibility(View.GONE);
+                    } else {
+                        showExtraDetails = true;
+                        mExtraDetails.setText(R.string.tv_collaps_extra_details);
+                        itemView.findViewById(R.id.extra_details).setVisibility(View.VISIBLE);
+
+                    }
+                }
+            });
 
             this.mClickListener = listener;
 
@@ -99,8 +117,15 @@ public  class ItemAdapter extends SelectableItemAdapter {
         public void bindItem(Item item, ItemInList itemInList, float textSize, boolean isSelected){
             Log.d("RROI", "" + item.getName());
             setName(item.getName());
-            setBrand(item.getBrand());
-            setWeight(item.getWeight());
+            if (setBrand(item.getBrand()) || setWeight(item.getWeight())){
+                if (mExtraDetails.getVisibility() != View.VISIBLE) {
+                    mExtraDetails.setVisibility(View.VISIBLE);
+                }
+            } else {
+                if (mExtraDetails.getVisibility() != View.GONE) {
+                    mExtraDetails.setVisibility(View.GONE);
+                }
+            }
             setVolume(item.getVolume());
             setAssignee(itemInList.getAssignee());
             setQuantity(itemInList.getQuantity());
@@ -110,7 +135,10 @@ public  class ItemAdapter extends SelectableItemAdapter {
             setVolumeSize(textSize);
             setAssigneeSize(textSize);
             if (isSelected)
-                setWeight("Chosen");
+                itemView.setBackgroundResource(R.color.ripple_material_light);
+            else
+                itemView.setBackgroundResource(R.color.transparent);
+
 
 
         }
@@ -119,20 +147,24 @@ public  class ItemAdapter extends SelectableItemAdapter {
         public void setName(String value) {
             mName.setText(value);
         }
-        public void setBrand(String value) {
-            if (value == null ||value == "")
+        public boolean setBrand(String value) {
+            if (value == null || value.equals("")) {
                 mBrand.setVisibility(View.GONE);
-            else {
+                return false;
+            } else {
                 mBrand.setVisibility(View.VISIBLE);
                 mBrand.setText(value);
+                return true;
             }
         }
-        public void setWeight(String value) {
-            if (value == null || value == "")
+        public boolean setWeight(String value) {
+            if (value == null || value.equals("")) {
                 mWeight.setVisibility(View.GONE);
-            else if (value != null) {
+                return false;
+            } else {
                 mWeight.setVisibility(View.VISIBLE);
                 mWeight.setText(value);
+                return true;
             }
         }
         public void setVolume(String value) {
