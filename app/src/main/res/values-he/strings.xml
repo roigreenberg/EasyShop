@@ -21,6 +21,8 @@
     <string name="Extra_details">פרטים נוספים</string>
     <string name="tv_expand_extra_details">פרטים נוספים..</string>
     <string name="tv_collaps_extra_details">סגור..</string>
+    <string name="remove_from_list">הסר מהרשימה</string>
+    <string name="add_to_list">הוסף לרשימה</string>
 
 
 </resources>

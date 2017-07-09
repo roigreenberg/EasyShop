@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.google.firebase.database.DataSnapshot;
@@ -20,6 +21,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
+import static com.roigreenberg.easyshop.ListActivity.isSelectionMode;
 import static com.roigreenberg.easyshop.MainActivity.ITEMS;
 
 /**
@@ -58,21 +60,21 @@ public  class ItemAdapter extends SelectableItemAdapter {
                 Item itemData = dataSnapshot.getValue(Item.class);
                 itemHolder.bindItem(dataSnapshot, item, done, /*mTextSize*/15, isSelected(position));
 
-                itemHolder.mCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                itemHolder.mImageButton.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        if (!done && isChecked) {
-                            Log.e("RROI", "cb->check " + itemInListRef.toString());
-                            itemInListRef.getParent().getParent().child("DoneItems").push().setValue(item);
-                            itemInListRef.removeValue();
-                        } else if (done && !isChecked) {
+                    public void onClick(View v) {
+                        if (done) {
                             Log.e("RROI", "cb->uncheck "  + itemInListRef.toString());
                             itemInListRef.getParent().getParent().child("Items").push().setValue(item);
                             itemInListRef.removeValue();
+
+                        } else {
+                            Log.e("RROI", "cb->check " + itemInListRef.toString());
+                            itemInListRef.getParent().getParent().child("DoneItems").push().setValue(item);
+                            itemInListRef.removeValue();
                         }
-                        buttonView.setTag(null);
-                        //notifyDataSetChanged();
                     }
+
                 });
             }
 
@@ -96,8 +98,9 @@ public  class ItemAdapter extends SelectableItemAdapter {
         //private final TextView mBarcode;
         //private final TextView[] mImage;
         private final TextView mExtraDetails;
-        private final CheckBox mCheckBox;
+        private final ImageButton mImageButton;
         private boolean showExtraDetails = false;
+        private boolean doneList;
 
         private ClickListener mClickListener;
 
@@ -117,6 +120,7 @@ public  class ItemAdapter extends SelectableItemAdapter {
             this.mExtraDetails.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    Log.e("RROI", "extra on click " + showExtraDetails);
                     if (showExtraDetails) {
                         showExtraDetails = false;
                         mExtraDetails.setText(R.string.tv_expand_extra_details);
@@ -129,7 +133,7 @@ public  class ItemAdapter extends SelectableItemAdapter {
                     }
                 }
             });
-            this.mCheckBox = (CheckBox) itemView.findViewById(R.id.cb_item);
+            this.mImageButton = (ImageButton) itemView.findViewById(R.id.ib_item);
             this.mClickListener = listener;
 
             itemView.setOnClickListener(this);
@@ -141,19 +145,12 @@ public  class ItemAdapter extends SelectableItemAdapter {
         public void bindItem(DataSnapshot dataSnapshot, ItemInList itemInList, boolean done, float textSize, boolean isSelected){
             itemsRef = dataSnapshot.getRef();
             Item item = dataSnapshot.getValue(Item.class);
+            doneList = done;
             Log.d("RROI", "" + item.getName());
             setName(item.getName());
             boolean isBrand = setBrand(item.getBrand());
             boolean isWeight = setWeight(item.getWeight());
-            if (isBrand || isWeight){
-                if (mExtraDetails.getVisibility() != View.VISIBLE) {
-                    mExtraDetails.setVisibility(View.VISIBLE);
-                }
-            } else {
-                if (mExtraDetails.getVisibility() != View.GONE) {
-                    mExtraDetails.setVisibility(View.GONE);
-                }
-            }
+
             setVolume(item.getVolume());
             setAssignee(itemInList.getAssignee());
             setQuantity(itemInList.getQuantity());
@@ -167,7 +164,39 @@ public  class ItemAdapter extends SelectableItemAdapter {
             } else {
                 itemView.setBackgroundResource(R.color.transparent);
             }
-            mCheckBox.setChecked(done);
+            if (isSelectionMode()) {
+                if (mExtraDetails.getVisibility() != View.GONE) {
+                    mExtraDetails.setVisibility(View.GONE);
+                }
+                itemView.findViewById(R.id.extra_details).setVisibility(View.GONE);
+                mImageButton.setVisibility(View.GONE);
+            } else {
+                if (isBrand || isWeight){
+                    if (mExtraDetails.getVisibility() != View.VISIBLE) {
+                        mExtraDetails.setVisibility(View.VISIBLE);
+                    }
+                } else {
+                    if (mExtraDetails.getVisibility() != View.GONE) {
+                        mExtraDetails.setVisibility(View.GONE);
+                    }
+                }
+                Log.e("RROI", "bind " + showExtraDetails);
+                if (showExtraDetails) {
+                    mExtraDetails.setText(R.string.tv_collaps_extra_details);
+                    itemView.findViewById(R.id.extra_details).setVisibility(View.VISIBLE);
+                } else {
+                    mExtraDetails.setText(R.string.tv_expand_extra_details);
+                    itemView.findViewById(R.id.extra_details).setVisibility(View.GONE);
+                }
+                mImageButton.setVisibility(View.VISIBLE);
+                if (doneList) {
+                    mImageButton.setContentDescription(mImageButton.getContext().getString(R.string.add_to_list));
+                    mImageButton.setBackgroundResource(R.drawable.ic_add_shopping_cart_black_24dp);
+                } else {
+                    mImageButton.setContentDescription(mImageButton.getContext().getString(R.string.remove_from_list));
+                    mImageButton.setBackgroundResource(R.drawable.ic_remove_shopping_cart_black_24dp);
+                }
+            }
 
 
 
@@ -176,6 +205,8 @@ public  class ItemAdapter extends SelectableItemAdapter {
 
         public void setName(String value) {
             mName.setText(value);
+            if (doneList)
+                mName.setPaintFlags(mName.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
         }
         public boolean setBrand(String value) {
             if (value == null || value.equals("")) {
@@ -241,7 +272,7 @@ public  class ItemAdapter extends SelectableItemAdapter {
         @Override
         public void onClick(View v) {
             if (mClickListener != null) {
-                mClickListener.onItemClicked(getPosition());
+                mClickListener.onItemClicked(doneList, getPosition());
             }
         }
 
@@ -249,7 +280,7 @@ public  class ItemAdapter extends SelectableItemAdapter {
         public boolean onLongClick(View v) {
 
             if (mClickListener != null) {
-                return mClickListener.onItemLongClicked(getPosition());
+                return mClickListener.onItemLongClicked(doneList, getPosition());
             }
 
             return false;
@@ -257,8 +288,8 @@ public  class ItemAdapter extends SelectableItemAdapter {
         //public void setID(String name) { mListNameField.setText(name); }
 
         public interface ClickListener {
-            public void onItemClicked(int position);
-            public boolean onItemLongClicked(int position);
+            public void onItemClicked(boolean done, int position);
+            public boolean onItemLongClicked(boolean done, int position);
         }
     }
 }

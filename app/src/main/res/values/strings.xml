@@ -29,6 +29,8 @@
     <string name="Extra_details">Extra Details</string>
     <string name="tv_expand_extra_details">Show extra details..</string>
     <string name="tv_collaps_extra_details">Hide extra details..</string>
+    <string name="remove_from_list">Remove from list</string>
+    <string name="add_to_list">Add to list</string>
 
 
 </resources>

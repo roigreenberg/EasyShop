@@ -21,6 +21,7 @@ public abstract class SelectableItemAdapter extends FirebaseRecyclerAdapter<Item
     private SparseBooleanArray selectedItems;
 
 
+
     public SelectableItemAdapter(Class<ItemInList> modelClass, int modelLayout, Class<ItemAdapter.ItemHolder> viewHolderClass, Query query) {
         super(modelClass, modelLayout, viewHolderClass, query);
         selectedItems = new SparseBooleanArray();

@@ -44,6 +44,7 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
     private ItemAdapter itemAdapter, doneItemAdapter;
     private ActionModeCallback actionModeCallback = new ActionModeCallback();
     private ActionMode actionMode;
+    private static boolean selectionMode = false;
 
 
     @Override
@@ -177,22 +178,30 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
     }
 
     @Override
-    public void onItemClicked(int position) {
+    public void onItemClicked(boolean doneList, int position) {
         if (actionMode != null) {
-            toggleSelection(position);
+            toggleSelection(doneList, position);
         }
 
     }
 
     @Override
-    public boolean onItemLongClicked(int position) {
+    public boolean onItemLongClicked(boolean doneList, int position) {
         if (actionMode == null) {
+            selectionMode = true;
+            itemAdapter.notifyDataSetChanged();
+            doneItemAdapter.notifyDataSetChanged();
             actionMode = startSupportActionMode(actionModeCallback);
+
         }
 
-        toggleSelection(position);
+        toggleSelection(doneList, position);
 
         return true;
+    }
+
+    public static boolean isSelectionMode() {
+        return selectionMode;
     }
 
     /**
@@ -203,11 +212,18 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
      *
      * @param position Position of the item to toggle the selection state
      */
-    private void toggleSelection(int position) {
-        itemAdapter.toggleSelection(position);
-        int count = itemAdapter.getSelectedItemCount();
+    private void toggleSelection(boolean doneList, int position) {
+        if (doneList)
+            doneItemAdapter.toggleSelection(position);
+        else
+            itemAdapter.toggleSelection(position);
+        int count = itemAdapter.getSelectedItemCount() +
+                doneItemAdapter.getSelectedItemCount();
 
         if (count == 0) {
+            selectionMode = false;
+            itemAdapter.notifyDataSetChanged();
+            doneItemAdapter.notifyDataSetChanged();
             actionMode.finish();
         } else {
             actionMode.setTitle(String.valueOf(count));
@@ -307,6 +323,13 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
                             ((ItemAdapter) mRecyclerView.getAdapter()).getRef(i).setValue(null);
                         }
                     }
+                    for (int i = mDoneRecyclerView.getAdapter().getItemCount() - 1; i >= 0; i--) {
+                        ItemAdapter.ItemHolder itemHolder = (ItemAdapter.ItemHolder) mDoneRecyclerView.findViewHolderForAdapterPosition(i);
+                        if (((ItemAdapter) mDoneRecyclerView.getAdapter()).isSelected(i)){
+
+                            ((ItemAdapter) mDoneRecyclerView.getAdapter()).getRef(i).setValue(null);
+                        }
+                    }
                     Log.d(TAG, "menu_remove");
                     mode.finish();
                     return true;
@@ -319,6 +342,10 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
         @Override
         public void onDestroyActionMode(ActionMode mode) {
             itemAdapter.clearSelection();
+            doneItemAdapter.clearSelection();
+            selectionMode = false;
+            itemAdapter.notifyDataSetChanged();
+            doneItemAdapter.notifyDataSetChanged();
             actionMode = null;
         }
     }
