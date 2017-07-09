@@ -11,8 +11,6 @@ public class ItemInList {
     private String mState;
     private String mAssignee;
 
-
-
     private String mName;
 
     public ItemInList(String mItemID, String mQuantity, String mState, String mAssignee, String mName) {
@@ -65,4 +63,5 @@ public class ItemInList {
     public void setName(String mName) {
         this.mName = mName;
     }
+
 }

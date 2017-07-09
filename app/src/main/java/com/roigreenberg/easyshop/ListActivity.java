@@ -38,10 +38,10 @@ import static com.roigreenberg.easyshop.MainActivity.mUserID;
 
 public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemHolder.ClickListener{
 
-    private RecyclerView mRecyclerView;
+    private RecyclerView mRecyclerView, mDoneRecyclerView;
     private DatabaseReference listRef;
     private Query query;
-    private ItemAdapter itemAdapter;
+    private ItemAdapter itemAdapter, doneItemAdapter;
     private ActionModeCallback actionModeCallback = new ActionModeCallback();
     private ActionMode actionMode;
 
@@ -52,12 +52,8 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
         setContentView(R.layout.activity_list);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_items);
-        mRecyclerView.setHasFixedSize(false);
-        RecyclerView.LayoutManager ownLayoutManager = new LinearLayoutManager
-                (this, LinearLayoutManager.VERTICAL, false);
-        ownLayoutManager.setAutoMeasureEnabled(true);
-        mRecyclerView.setLayoutManager(ownLayoutManager);
+
+        getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         String  listID;
         Bundle extras = getIntent().getExtras();
@@ -67,12 +63,18 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
             return;
         }
 
-        getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        //FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+        mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_items);
+        mRecyclerView.setHasFixedSize(false);
+        RecyclerView.LayoutManager ownLayoutManager = new LinearLayoutManager
+                (this, LinearLayoutManager.VERTICAL, false);
+        ownLayoutManager.setAutoMeasureEnabled(true);
+        mRecyclerView.setLayoutManager(ownLayoutManager);
+
         listRef = FirebaseDatabase.getInstance().getReference().child(LISTS).child(listID);
-        itemAdapter = new ItemAdapter(listRef.child(ITEMS).orderByChild("name"), this);
+        itemAdapter = new ItemAdapter(listRef.child(ITEMS).orderByChild("name"), this, false);
 
         mRecyclerView.setAdapter(itemAdapter);
+
         listRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -82,8 +84,6 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
                 //listHolder.setNameSize(mTextSize);
                 //listHolder.setShareOnClick(new MainActivity.ShareOnClickListener(mUserID, listID, listData.getListName()));
 
-
-
             }
 
 
@@ -92,6 +92,18 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
 
             }
         });
+
+        mDoneRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_done_items);
+        mDoneRecyclerView.setHasFixedSize(false);
+        RecyclerView.LayoutManager doneLayoutManager = new LinearLayoutManager
+                (this, LinearLayoutManager.VERTICAL, false);
+        doneLayoutManager.setAutoMeasureEnabled(true);
+        mDoneRecyclerView.setLayoutManager(doneLayoutManager);
+
+        listRef = FirebaseDatabase.getInstance().getReference().child(LISTS).child(listID);
+        doneItemAdapter = new ItemAdapter(listRef.child("DoneItems").orderByChild("name"), this, true);
+
+        mDoneRecyclerView.setAdapter(doneItemAdapter);
 
         new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
             @Override

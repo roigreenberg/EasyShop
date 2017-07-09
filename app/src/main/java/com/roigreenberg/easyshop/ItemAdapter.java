@@ -6,6 +6,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import com.google.firebase.database.DataSnapshot;
@@ -27,13 +29,15 @@ import static com.roigreenberg.easyshop.MainActivity.ITEMS;
 public  class ItemAdapter extends SelectableItemAdapter {
 
     private ItemHolder.ClickListener clickListener;
+    private boolean done;
 
-    public ItemAdapter(Query query, ItemHolder.ClickListener clickListener) {
+    public ItemAdapter(Query query, ItemHolder.ClickListener clickListener, boolean done) {
         super(ItemInList.class,
                 R.layout.item,
                 ItemAdapter.ItemHolder.class,
                 query);
         this.clickListener = clickListener;
+        this.done = done;
     }
 
     @Override
@@ -45,14 +49,31 @@ public  class ItemAdapter extends SelectableItemAdapter {
     @Override
     protected void populateViewHolder(final ItemHolder itemHolder, final ItemInList item, final int position) {
         final String itemID = item.getItemID();
-
+        final DatabaseReference itemInListRef = this.getRef(position);
         DatabaseReference itemsRef = FirebaseDatabase.getInstance().getReference().child(ITEMS).child(itemID);
 
         itemsRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Item itemData = dataSnapshot.getValue(Item.class);
-                itemHolder.bindItem(itemData, item, /*mTextSize*/15, isSelected(position));
+                itemHolder.bindItem(dataSnapshot, item, done, /*mTextSize*/15, isSelected(position));
+
+                itemHolder.mCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        if (!done && isChecked) {
+                            Log.e("RROI", "cb->check " + itemInListRef.toString());
+                            itemInListRef.getParent().getParent().child("DoneItems").push().setValue(item);
+                            itemInListRef.removeValue();
+                        } else if (done && !isChecked) {
+                            Log.e("RROI", "cb->uncheck "  + itemInListRef.toString());
+                            itemInListRef.getParent().getParent().child("Items").push().setValue(item);
+                            itemInListRef.removeValue();
+                        }
+                        buttonView.setTag(null);
+                        //notifyDataSetChanged();
+                    }
+                });
             }
 
             @Override
@@ -75,9 +96,12 @@ public  class ItemAdapter extends SelectableItemAdapter {
         //private final TextView mBarcode;
         //private final TextView[] mImage;
         private final TextView mExtraDetails;
-        private static boolean showExtraDetails = false;
+        private final CheckBox mCheckBox;
+        private boolean showExtraDetails = false;
 
         private ClickListener mClickListener;
+
+        private DatabaseReference itemsRef;
 
         public ItemHolder(final View itemView, ClickListener listener) {
             super(itemView);
@@ -105,7 +129,7 @@ public  class ItemAdapter extends SelectableItemAdapter {
                     }
                 }
             });
-
+            this.mCheckBox = (CheckBox) itemView.findViewById(R.id.cb_item);
             this.mClickListener = listener;
 
             itemView.setOnClickListener(this);
@@ -114,10 +138,14 @@ public  class ItemAdapter extends SelectableItemAdapter {
 
 
 
-        public void bindItem(Item item, ItemInList itemInList, float textSize, boolean isSelected){
+        public void bindItem(DataSnapshot dataSnapshot, ItemInList itemInList, boolean done, float textSize, boolean isSelected){
+            itemsRef = dataSnapshot.getRef();
+            Item item = dataSnapshot.getValue(Item.class);
             Log.d("RROI", "" + item.getName());
             setName(item.getName());
-            if (setBrand(item.getBrand()) || setWeight(item.getWeight())){
+            boolean isBrand = setBrand(item.getBrand());
+            boolean isWeight = setWeight(item.getWeight());
+            if (isBrand || isWeight){
                 if (mExtraDetails.getVisibility() != View.VISIBLE) {
                     mExtraDetails.setVisibility(View.VISIBLE);
                 }
@@ -134,10 +162,12 @@ public  class ItemAdapter extends SelectableItemAdapter {
             setBrandSize(textSize);
             setVolumeSize(textSize);
             setAssigneeSize(textSize);
-            if (isSelected)
+            if (isSelected) {
                 itemView.setBackgroundResource(R.color.ripple_material_light);
-            else
+            } else {
                 itemView.setBackgroundResource(R.color.transparent);
+            }
+            mCheckBox.setChecked(done);
 
 
 
@@ -149,7 +179,7 @@ public  class ItemAdapter extends SelectableItemAdapter {
         }
         public boolean setBrand(String value) {
             if (value == null || value.equals("")) {
-                mBrand.setVisibility(View.GONE);
+                mBrand.setVisibility(View.INVISIBLE);
                 return false;
             } else {
                 mBrand.setVisibility(View.VISIBLE);
@@ -159,7 +189,7 @@ public  class ItemAdapter extends SelectableItemAdapter {
         }
         public boolean setWeight(String value) {
             if (value == null || value.equals("")) {
-                mWeight.setVisibility(View.GONE);
+                mWeight.setVisibility(View.INVISIBLE);
                 return false;
             } else {
                 mWeight.setVisibility(View.VISIBLE);
