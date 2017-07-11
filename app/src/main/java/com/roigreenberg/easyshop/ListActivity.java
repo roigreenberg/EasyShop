@@ -20,6 +20,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -45,6 +47,7 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
     private ActionModeCallback actionModeCallback = new ActionModeCallback();
     private ActionMode actionMode;
     private static boolean selectionMode = false;
+    private AdView mAdView;
 
 
     @Override
@@ -144,6 +147,15 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
                 startActivity(addItemIntent);
             }
         });
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        mAdView = (AdView) findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
     }
 
     @Override

@@ -53,6 +53,7 @@
             android:text="@string/tv_expand_extra_details"
             android:visibility="invisible"
             app:layout_constraintLeft_toLeftOf="@+id/tv_item_name"
+            app:layout_constraintStart_toStartOf="@id/tv_item_name"
             app:layout_constraintTop_toBottomOf="@+id/tv_item_name" />
 
         <include
@@ -64,6 +65,7 @@
             android:layout_marginLeft="24dp"
             android:visibility="gone"
             app:layout_constraintLeft_toLeftOf="@+id/tv_item_extra_details"
+            app:layout_constraintStart_toStartOf="@+id/tv_item_extra_details"
             app:layout_constraintTop_toBottomOf="@+id/tv_item_extra_details">
 
         </include>
@@ -87,6 +89,7 @@
             android:layout_marginRight="8dp"
             android:text="Quantity"
             app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@+id/tv_item_name" />
 
     </android.support.constraint.ConstraintLayout>

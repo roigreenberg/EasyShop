@@ -24,6 +24,9 @@ import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.appinvite.AppInvite;
 import com.google.android.gms.appinvite.AppInviteInvitationResult;
 import com.google.android.gms.appinvite.AppInviteReferral;
@@ -57,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     public static final String LISTS = "Lists";
     public static final String USERS = "Users";
     public static final String SHARED_LISTS = "SharedLists";
+    private static final java.lang.String ADMOB_APP_ID = "ca-app-pub-4002826927033249~5513754216";
     private RecyclerView mOwnListsRecyclerView, mSharedListsRecyclerView;
 
     public static String mUsername;
@@ -80,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private DatabaseReference mUserItemsRef;
     private FirebaseRecyclerAdapter mOwnListAdapter;
     private GoogleApiClient mGoogleApiClient;
+    private AdView mAdView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -166,28 +171,48 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                             }
                             Uri uri = Uri.parse(deepLink);
                             String userID = uri.getQueryParameter("UserID"); //TODO is it needed?
-                            String listID = uri.getQueryParameter("ListID"); //TODO change name
+                            final String listID = uri.getQueryParameter("ListID"); //TODO change name
                             if (userID == null || listID == null)
                                 return;
-                            Toast.makeText(MainActivity.this, "UserID= " +userID + "ListID= " + listID, Toast.LENGTH_LONG).show();
+                            //Toast.makeText(MainActivity.this, "UserID= " +userID + "ListID= " + listID, Toast.LENGTH_LONG).show();
 
 
                             //add new item name to SList
-                            DatabaseReference userRef = mDatabaseReference.child(USERS).child(mUserID).child(LISTS).push();
-                            userRef.setValue(new ListForUser(listID));
+                            final DatabaseReference  userRef = mDatabaseReference.child(USERS).child(mUserID).child(LISTS);
+                            userRef.orderByChild("listID").equalTo(listID).addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    if(dataSnapshot.getValue() != null) {
+                                        Toast.makeText(MainActivity.this, "List already exists!", Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        userRef.push().setValue(new ListForUser(listID));
 
-                            DatabaseReference ref = mDatabaseReference.child(LISTS).child(listID);
-                            ref.child(USERS).child(mUserID).setValue("user");
+                                        DatabaseReference ref = mDatabaseReference.child(LISTS).child(listID);
+                                        ref.child(USERS).child(mUserID).setValue("user");
 
-                            //update ListView adapter
-                            mOwnListAdapter.notifyDataSetChanged();
-                            Toast.makeText(MainActivity.this, "Adding sucessful!", Toast.LENGTH_SHORT).show();
+                                        //update ListView adapter
+                                        mOwnListAdapter.notifyDataSetChanged();
+                                        Toast.makeText(MainActivity.this, "Adding sucessful!", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
+
                         }
                     }
                 });
                 //DatabaseReference mUserListsRef = FirebaseDatabase.getInstance().getReference().child("Users");
 
         setupSharedPreferences();
+
+        MobileAds.initialize(this, ADMOB_APP_ID);
+        mAdView = (AdView) findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
     }
 
     @Override
@@ -318,8 +343,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         final EditText editText = (EditText) dialogView.findViewById(R.id.et_add_list);
 
-        dialogBuilder.setTitle("Adding new SList");
-        dialogBuilder.setMessage("Input a SList name");
+        dialogBuilder.setTitle("Adding new list");
+        dialogBuilder.setMessage("Input a list name");
 
         dialogBuilder.setPositiveButton("Done", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
@@ -440,7 +465,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         @Override
         public void onClick(View v)
         {
-            ShareList(getBaseContext(), userId, listId);
+            ShareList(v.getContext(), userId, listId);
         }
 
     };
