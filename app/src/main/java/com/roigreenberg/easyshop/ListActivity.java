@@ -1,8 +1,12 @@
 package com.roigreenberg.easyshop;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
@@ -14,8 +18,10 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ListAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,7 +50,7 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
     private DatabaseReference listRef;
     private Query query;
     private ItemAdapter itemAdapter, doneItemAdapter;
-    private ActionModeCallback actionModeCallback = new ActionModeCallback();
+    private ActionModeCallback actionModeCallback = new ActionModeCallback(this);
     private ActionMode actionMode;
     private static boolean selectionMode = false;
     private AdView mAdView;
@@ -246,6 +252,12 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
     private class ActionModeCallback implements ActionMode.Callback {
         @SuppressWarnings("unused")
         private final String TAG = ActionModeCallback.class.getSimpleName();
+        private List<String> users;
+        private Context context;
+
+        ActionModeCallback(Context context) {
+            this.context = context;
+        }
 
         @Override
         public boolean onCreateActionMode(final ActionMode mode, Menu menu) {
@@ -258,10 +270,53 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
                     // Is better to use a List, because you don't know the size
                     // of the iterator returned by dataSnapshot.getChildren() to
                     // initialize the array
+                    users = new ArrayList<String>();
+
+                    final DatabaseReference usersDatabaseReference = FirebaseDatabase.getInstance().getReference().child(USERS);
+                    for (DataSnapshot userSnapshot: dataSnapshot.getChildren()) {
+                        //String userName = userSnapshot.child("Name").getValue(String.class);
+                        String userID = userSnapshot.getKey();
+                        Log.d("RROI", "onCreateActionMode " + userID);
+                        usersDatabaseReference.child(userID).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                String userName = dataSnapshot.child("Name").getValue(String.class);
+                                if (userName != null) {
+                                    Log.d("RROI", "onCreateActionMode " + userName);
+                                    users.add(userName);
+                                }
+                                else
+                                    Log.d("RROI", "onCreateActionMode " + "fail to get user name");
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
+
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+            /*final Spinner userSpinner = (Spinner) menu.findItem(R.id.menu_users_spinner).getActionView();
+            if (userSpinner == null)
+                Log.e("RROI", "userSpinner in null");
+            listRef.child(USERS).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    Toast.makeText(ListActivity.this, dataSnapshot.getKey().toString(),Toast.LENGTH_LONG);
+                    // Is better to use a List, because you don't know the size
+                    // of the iterator returned by dataSnapshot.getChildren() to
+                    // initialize the array
                     final List<String> users = new ArrayList<String>();
 
                     final DatabaseReference usersDatabaseReference = FirebaseDatabase.getInstance().getReference().child(USERS);
-
                     for (DataSnapshot userSnapshot: dataSnapshot.getChildren()) {
                         //String userName = userSnapshot.child("Name").getValue(String.class);
                         String userID = userSnapshot.getKey();
@@ -282,26 +337,6 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
                             }
                         });
                     }
-                    Spinner userSpinner = (Spinner) findViewById(R.id.menu_users_spinner);
-                    userSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                        @Override
-                        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                            for (int i = mRecyclerView.getAdapter().getItemCount() - 1; i >= 0; i--) {
-                                ItemAdapter.ItemHolder itemHolder = (ItemAdapter.ItemHolder) mRecyclerView.findViewHolderForAdapterPosition(i);
-                                if (((ItemAdapter) mRecyclerView.getAdapter()).isSelected(i)){
-
-                                    Log.d("RROI", ((ItemAdapter) mRecyclerView.getAdapter()).getRef(i).toString());
-                                }
-                            }
-                            Log.d(TAG, "menu_spinner");
-                            mode.finish();
-                        }
-
-                        @Override
-                        public void onNothingSelected(AdapterView<?> parent) {
-
-                        }
-                    });
 
                     ArrayAdapter<String> usersAdapter = new ArrayAdapter<String>(ListActivity.this, android.R.layout.simple_spinner_item, users);
                     usersAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -315,6 +350,29 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
                 }
             });
 
+
+            userSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    Log.e("RROI", "on spinner");
+                    for (int i = mRecyclerView.getAdapter().getItemCount() - 1; i >= 0; i--) {
+                        ItemAdapter.ItemHolder itemHolder = (ItemAdapter.ItemHolder) mRecyclerView.findViewHolderForAdapterPosition(i);
+                        if (((ItemAdapter) mRecyclerView.getAdapter()).isSelected(i)){
+
+                            Log.d("RROI", ((ItemAdapter) mRecyclerView.getAdapter()).getRef(i).toString());
+                        }
+                    }
+                    Log.d(TAG, "menu_spinner");
+                    mode.finish();
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+
+                }
+            });
+*/
+
             return true;
         }
 
@@ -324,7 +382,7 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
         }
 
         @Override
-        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+        public boolean onActionItemClicked(final ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.menu_remove:
                     // TODO: actually remove items
@@ -347,10 +405,51 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
                     doneItemAdapter.notifyDataSetChanged();
                     mode.finish();
                     return true;
+                case R.id.menu_users_picker:
+                    showAssigningDialog(mode);
+                    return true;
 
                 default:
                     return false;
             }
+        }
+
+        private void showAssigningDialog(final ActionMode mode) {
+
+            final CharSequence[] charSequenceItems = users.toArray(new CharSequence[users.size()]);
+            Log.d("RROI", charSequenceItems[0].toString());
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            builder.setTitle("Assign items to:");
+            builder.setItems(charSequenceItems, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    Log.e("RROI", "on picker");
+                    for (int i = itemAdapter.getItemCount() - 1; i >= 0; i--) {
+                        ItemAdapter.ItemHolder itemHolder = (ItemAdapter.ItemHolder) mRecyclerView.findViewHolderForAdapterPosition(i);
+                        if (itemAdapter.isSelected(i)){
+                            Log.e("RROI", "Before " + itemAdapter.getRef(i).child("assignee").toString());
+                            itemAdapter.getRef(i).child("assignee").setValue(charSequenceItems[which].toString());
+                            itemAdapter.notifyItemChanged(i);
+                            Log.e("RROI", "After " + itemAdapter.getRef(i).child("assignee").toString());
+                        }
+                    }
+                    for (int i = doneItemAdapter.getItemCount() - 1; i >= 0; i--) {
+                        ItemAdapter.ItemHolder itemHolder = (ItemAdapter.ItemHolder) mDoneRecyclerView.findViewHolderForAdapterPosition(i);
+                        if (doneItemAdapter.isSelected(i)){
+                            Log.e("RROI", "Before " + doneItemAdapter.getRef(i).child("assignee").toString());
+                            doneItemAdapter.getRef(i).child("assignee").setValue(charSequenceItems[which].toString());
+                            doneItemAdapter.notifyItemChanged(i);
+                            Log.e("RROI", "After " + doneItemAdapter.getRef(i).child("assignee").toString());
+                        }
+                    }
+                    Log.d(TAG, "menu_users_picker");
+                    //itemAdapter.notifyDataSetChanged();
+                   //doneItemAdapter.notifyDataSetChanged();
+                    mode.finish();
+                }
+            });
+            AlertDialog b = builder.create();
+            b.show();
         }
 
         @Override

@@ -378,7 +378,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             }
         });
         AlertDialog b = dialogBuilder.create();
-       b.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        b.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         b.show();
     }
 
