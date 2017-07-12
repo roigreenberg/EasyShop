@@ -330,19 +330,21 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
                     // TODO: actually remove items
                     for (int i = mRecyclerView.getAdapter().getItemCount() - 1; i >= 0; i--) {
                         ItemAdapter.ItemHolder itemHolder = (ItemAdapter.ItemHolder) mRecyclerView.findViewHolderForAdapterPosition(i);
-                        if (((ItemAdapter) mRecyclerView.getAdapter()).isSelected(i)){
+                        if (itemAdapter.isSelected(i)){
 
-                            ((ItemAdapter) mRecyclerView.getAdapter()).getRef(i).setValue(null);
+                            itemAdapter.getRef(i).setValue(null);
                         }
                     }
                     for (int i = mDoneRecyclerView.getAdapter().getItemCount() - 1; i >= 0; i--) {
                         ItemAdapter.ItemHolder itemHolder = (ItemAdapter.ItemHolder) mDoneRecyclerView.findViewHolderForAdapterPosition(i);
-                        if (((ItemAdapter) mDoneRecyclerView.getAdapter()).isSelected(i)){
+                        if (doneItemAdapter.isSelected(i)){
 
-                            ((ItemAdapter) mDoneRecyclerView.getAdapter()).getRef(i).setValue(null);
+                            doneItemAdapter.getRef(i).setValue(null);
                         }
                     }
-                    Log.d(TAG, "menu_remove");
+                    selectionMode = false;
+                    itemAdapter.notifyDataSetChanged();
+                    doneItemAdapter.notifyDataSetChanged();
                     mode.finish();
                     return true;
 
