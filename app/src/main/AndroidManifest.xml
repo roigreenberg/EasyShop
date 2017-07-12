@@ -33,7 +33,8 @@
         </activity>
         <activity
             android:name=".AddItemActivity"
-            android:label="@string/add_item_activity_name" />
+            android:label="@string/add_item_activity_name"
+            android:windowSoftInputMode="stateAlwaysVisible"/>
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"

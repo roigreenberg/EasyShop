@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.text.Layout;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -41,6 +42,11 @@ public class AddItemActivity extends AppCompatActivity {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 // Apply the adapter to the spinner
         spinner.setAdapter(adapter);
+
+        EditText nameEditText= (EditText) findViewById(R.id.et_item_name);
+        nameEditText.requestFocus();
+        //InputMethodManager imm = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
+        //imm.showSoftInput(nameEditText, InputMethodManager.SHOW_IMPLICIT);
 
     }
 

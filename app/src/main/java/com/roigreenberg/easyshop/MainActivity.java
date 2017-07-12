@@ -18,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -343,6 +344,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         final EditText editText = (EditText) dialogView.findViewById(R.id.et_add_list);
 
+        // show soft keyboard
+        editText.requestFocus();
+
+
         dialogBuilder.setTitle("Adding new list");
         dialogBuilder.setMessage("Input a list name");
 
@@ -373,6 +378,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             }
         });
         AlertDialog b = dialogBuilder.create();
+       b.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         b.show();
     }
 
