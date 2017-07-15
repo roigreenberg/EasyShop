@@ -2,16 +2,10 @@ package com.roigreenberg.easyshop;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.Layout;
-import android.util.Log;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -34,7 +28,7 @@ public class AddItemActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        Spinner spinner = (Spinner) findViewById(R.id.sp_item_quantity);
+        Spinner spinner = (Spinner) findViewById(R.id.sp_add_item_quantity);
 // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.item_quantity_numbers, android.R.layout.simple_spinner_item);
@@ -70,7 +64,7 @@ public class AddItemActivity extends AppCompatActivity {
             return;
         }
 
-        String itemQuantity = ((Spinner) findViewById(R.id.sp_item_quantity)).getSelectedItem().toString();
+        String itemQuantity = ((Spinner) findViewById(R.id.sp_add_item_quantity)).getSelectedItem().toString();
 
         String itemBrand = null;
         String itemWeight = null;

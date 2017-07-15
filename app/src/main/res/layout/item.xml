@@ -51,6 +51,7 @@
             android:paddingStart="16dp"
             android:paddingTop="8dp"
             android:text="@string/tv_expand_extra_details"
+            android:textColor="@color/colorPrimary"
             android:visibility="invisible"
             app:layout_constraintLeft_toLeftOf="@+id/tv_item_name"
             app:layout_constraintStart_toStartOf="@id/tv_item_name"
@@ -71,26 +72,34 @@
         </include>
 
         <TextView
+            android:id="@+id/tv_item_quantity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingRight="8dp"
+            android:paddingEnd="8dp"
+            android:paddingLeft="8dp"
+            android:paddingStart="8dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="4dp"
+            android:text="Quantity"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
             android:id="@+id/tv_item_assignee"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:layout_marginTop="8dp"
+            android:paddingRight="8dp"
+            android:paddingEnd="8dp"
+            android:paddingLeft="8dp"
+            android:paddingStart="8dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="8dp"
             android:text="Assignee"
             app:layout_constraintEnd_toEndOf="@+id/tv_item_quantity"
             app:layout_constraintRight_toRightOf="@+id/tv_item_quantity"
             app:layout_constraintTop_toBottomOf="@+id/tv_item_quantity" />
-
-        <TextView
-            android:id="@+id/tv_item_quantity"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:text="Quantity"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/tv_item_name" />
 
     </android.support.constraint.ConstraintLayout>
 

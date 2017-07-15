@@ -1,15 +1,22 @@
 package com.roigreenberg.easyshop;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Paint;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.NumberPicker;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -32,20 +39,22 @@ public  class ItemAdapter extends SelectableItemAdapter {
 
     private ItemHolder.ClickListener clickListener;
     private boolean done;
+    private Context context;
 
-    public ItemAdapter(Query query, ItemHolder.ClickListener clickListener, boolean done) {
+    public ItemAdapter(Context context, Query query, ItemHolder.ClickListener clickListener, boolean done) {
         super(ItemInList.class,
                 R.layout.item,
                 ItemAdapter.ItemHolder.class,
                 query);
         this.clickListener = clickListener;
         this.done = done;
+        this.context = context;
     }
 
     @Override
     public ItemHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(viewType, parent, false);
-        return new ItemHolder(view, clickListener);
+        return new ItemHolder(context, view, clickListener);
     }
 
     @Override
@@ -58,7 +67,7 @@ public  class ItemAdapter extends SelectableItemAdapter {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Item itemData = dataSnapshot.getValue(Item.class);
-                itemHolder.bindItem(dataSnapshot, item, done, /*mTextSize*/15, isSelected(position));
+                itemHolder.bindItem(dataSnapshot, itemInListRef, item, done, /*mTextSize*/15, isSelected(position));
 
                 itemHolder.mImageButton.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -104,10 +113,13 @@ public  class ItemAdapter extends SelectableItemAdapter {
 
         private ClickListener mClickListener;
 
-        private DatabaseReference itemsRef;
+        private DatabaseReference itemsRef, itemInListRef;
+        private Context context;
+        private int current_quantity;
 
-        public ItemHolder(final View itemView, ClickListener listener) {
+        public ItemHolder(final Context context, final View itemView, ClickListener listener) {
             super(itemView);
+            this.context = context;
             //this.mID = (TextView) itemView.findViewById(R.id.tv_list_name);
             this.mName = (TextView) itemView.findViewById(R.id.tv_item_name);
             this.mBrand = (TextView) itemView.findViewById(R.id.tv_item_brand);
@@ -116,6 +128,12 @@ public  class ItemAdapter extends SelectableItemAdapter {
             //this.mBarcode = (TextView) itemView.findViewById(R.id.tv_list_name);
             this.mAssignee = (TextView) itemView.findViewById(R.id.tv_item_assignee);
             this.mQuantity = (TextView) itemView.findViewById(R.id.tv_item_quantity);
+            this.mQuantity.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    showQuantityDialog();
+                }
+            });
             this.mExtraDetails = (TextView) itemView.findViewById(R.id.tv_item_extra_details);
             this.mExtraDetails.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -142,10 +160,11 @@ public  class ItemAdapter extends SelectableItemAdapter {
 
 
 
-        public void bindItem(DataSnapshot dataSnapshot, ItemInList itemInList, boolean done, float textSize, boolean isSelected){
+        public void bindItem(DataSnapshot dataSnapshot, DatabaseReference itemInListRef, ItemInList itemInList, boolean done, float textSize, boolean isSelected){
             itemsRef = dataSnapshot.getRef();
             Item item = dataSnapshot.getValue(Item.class);
             doneList = done;
+            this.itemInListRef = itemInListRef;
             Log.d("RROI", "" + item.getName());
             setName(item.getName());
             boolean isBrand = setBrand(item.getBrand());
@@ -153,6 +172,9 @@ public  class ItemAdapter extends SelectableItemAdapter {
 
             setVolume(item.getVolume());
             setAssignee(itemInList.getAssignee());
+            if (itemInList.getQuantity() == null)
+                itemInList.setQuantity("1");
+            current_quantity = Integer.parseInt(itemInList.getQuantity());
             setQuantity(itemInList.getQuantity());
             itemView.setTag(item.getID());
             setNameSize(textSize);
@@ -160,7 +182,7 @@ public  class ItemAdapter extends SelectableItemAdapter {
             setVolumeSize(textSize);
             setAssigneeSize(textSize);
             if (isSelected) {
-                itemView.setBackgroundResource(R.color.ripple_material_light);
+                itemView.setBackgroundResource(R.color.selectedItem);
             } else {
                 itemView.setBackgroundResource(R.color.transparent);
             }
@@ -290,6 +312,45 @@ public  class ItemAdapter extends SelectableItemAdapter {
         public interface ClickListener {
             public void onItemClicked(boolean done, int position);
             public boolean onItemLongClicked(boolean done, int position);
+        }
+
+        private void showQuantityDialog() {
+            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
+            LayoutInflater inflater = (LayoutInflater) context.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
+            final View dialogView = inflater.inflate(R.layout.layout_edit_item_quantity_dialog, null, false);
+            dialogBuilder.setView(dialogView);
+
+            final NumberPicker numberPicker = (NumberPicker) dialogView.findViewById(R.id.np_item_quantity);
+            numberPicker.setMaxValue(100); // max value 100
+            numberPicker.setMinValue(1);   // min value 0
+            numberPicker.setWrapSelectorWheel(false);
+
+            numberPicker.setValue(current_quantity);
+
+
+
+            dialogBuilder.setTitle("Item quantity");
+            dialogBuilder.setMessage("Choose item quantity:");
+
+            dialogBuilder.setPositiveButton("Done", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    //add new item name to SList
+                    DatabaseReference ref = itemInListRef.child("quantity");
+                    ref.setValue(Long.toString(numberPicker.getValue()));
+
+                    //update ListView adapter
+                    //mOwnListAdapter.notifyDataSetChanged();
+                    //Toast.makeText(MainActivity.this, "Adding sucessful!", Toast.LENGTH_SHORT).show();
+
+                }
+            });
+            dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    //do nothing, just close this dialog
+                }
+            });
+            AlertDialog b = dialogBuilder.create();
+            b.show();
         }
     }
 }

@@ -81,7 +81,7 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
         mRecyclerView.setLayoutManager(ownLayoutManager);
 
         listRef = FirebaseDatabase.getInstance().getReference().child(LISTS).child(listID);
-        itemAdapter = new ItemAdapter(listRef.child(ITEMS).orderByChild("name"), this, false);
+        itemAdapter = new ItemAdapter(this, listRef.child(ITEMS).orderByChild("name"), this, false);
 
         mRecyclerView.setAdapter(itemAdapter);
 
@@ -111,7 +111,7 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
         mDoneRecyclerView.setLayoutManager(doneLayoutManager);
 
         listRef = FirebaseDatabase.getInstance().getReference().child(LISTS).child(listID);
-        doneItemAdapter = new ItemAdapter(listRef.child("DoneItems").orderByChild("name"), this, true);
+        doneItemAdapter = new ItemAdapter(this, listRef.child("DoneItems").orderByChild("name"), this, true);
 
         mDoneRecyclerView.setAdapter(doneItemAdapter);
 
