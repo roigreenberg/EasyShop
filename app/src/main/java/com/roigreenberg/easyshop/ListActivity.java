@@ -159,8 +159,10 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
     protected void onStart() {
         super.onStart();
 
-        mAdView = (AdView) findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView = (AdView) findViewById(R.id.av_list);
+        AdRequest adRequest = new AdRequest.Builder()
+                .addTestDevice("AB840131C8782DD57088B9B95755DBDB")
+                .build();
         mAdView.loadAd(adRequest);
     }
 

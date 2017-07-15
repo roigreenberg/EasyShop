@@ -211,8 +211,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         setupSharedPreferences();
 
         MobileAds.initialize(this, ADMOB_APP_ID);
-        mAdView = (AdView) findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView = (AdView) findViewById(R.id.av_main);
+        AdRequest adRequest = new AdRequest.Builder()
+                .addTestDevice("AB840131C8782DD57088B9B95755DBDB")
+                .build();
         mAdView.loadAd(adRequest);
     }
 
