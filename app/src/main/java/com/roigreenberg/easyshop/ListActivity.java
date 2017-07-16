@@ -388,17 +388,40 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
             switch (item.getItemId()) {
                 case R.id.menu_remove:
                     // TODO: actually remove items
+                    final DatabaseReference items = FirebaseDatabase.getInstance().getReference().child(ITEMS);
                     for (int i = mRecyclerView.getAdapter().getItemCount() - 1; i >= 0; i--) {
                         ItemAdapter.ItemHolder itemHolder = (ItemAdapter.ItemHolder) mRecyclerView.findViewHolderForAdapterPosition(i);
                         if (itemAdapter.isSelected(i)){
+                            itemAdapter.getRef(i).addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    Log.d("RROI", "itemID " + dataSnapshot.child("itemID").getValue().toString());
+                                    items.child(dataSnapshot.child("itemID").getValue().toString()).removeValue();
+                                }
 
-                            itemAdapter.getRef(i).setValue(null);
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });                            itemAdapter.getRef(i).setValue(null);
                         }
                     }
                     for (int i = mDoneRecyclerView.getAdapter().getItemCount() - 1; i >= 0; i--) {
                         ItemAdapter.ItemHolder itemHolder = (ItemAdapter.ItemHolder) mDoneRecyclerView.findViewHolderForAdapterPosition(i);
                         if (doneItemAdapter.isSelected(i)){
+                            doneItemAdapter.getRef(i).addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    Log.d("RROI", "itemID " + dataSnapshot.child("itemID").getValue().toString());
+                                    items.child(dataSnapshot.child("itemID").getValue().toString()).removeValue();
+                                }
 
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
+                            //items.child(doneItemAdapter.getRef(i).child("itemID")).removeValue();
                             doneItemAdapter.getRef(i).setValue(null);
                         }
                     }
