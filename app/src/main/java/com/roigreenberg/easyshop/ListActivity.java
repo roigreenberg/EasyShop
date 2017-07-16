@@ -115,33 +115,33 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
 
         mDoneRecyclerView.setAdapter(doneItemAdapter);
 
-        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
-            @Override
-            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-                return false;
-            }
-
-            // Called when a user swipes left or right on a ViewHolder
-            @Override
-            public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
-
-                String itemId = (String) viewHolder.itemView.getTag();
-
-                ((ItemAdapter.ItemHolder) viewHolder).setNameCond(ItemAdapter.ItemHolder.BOUGHT);
-                clearView(mRecyclerView,viewHolder);
-
-                /*FirebaseDatabase.getInstance().getReference()
-                        .child("Users")
-                        .child(mUserID)
-                        .child(list)
-                        .child(mListID)
-                        .child("list")
-                        .child(itemId).setValue(null);*/
-
-
-            }
-
-        }).attachToRecyclerView(mRecyclerView);
+//        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+//            @Override
+//            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+//                return false;
+//            }
+//
+//            // Called when a user swipes left or right on a ViewHolder
+//            @Override
+//            public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
+//
+//                String itemId = (String) viewHolder.itemView.getTag();
+//
+//                ((ItemAdapter.ItemHolder) viewHolder).setNameCond(ItemAdapter.ItemHolder.BOUGHT);
+//                clearView(mRecyclerView,viewHolder);
+//
+//                /*FirebaseDatabase.getInstance().getReference()
+//                        .child("Users")
+//                        .child(mUserID)
+//                        .child(list)
+//                        .child(mListID)
+//                        .child("list")
+//                        .child(itemId).setValue(null);*/
+//
+//
+//            }
+//
+//        }).attachToRecyclerView(mRecyclerView);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
