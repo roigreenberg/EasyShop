@@ -29,11 +29,14 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.appinvite.AppInvite;
+import com.google.android.gms.appinvite.AppInviteInvitation;
 import com.google.android.gms.appinvite.AppInviteInvitationResult;
 import com.google.android.gms.appinvite.AppInviteReferral;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.appinvite.FirebaseAppInvite;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -43,6 +46,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
+import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -85,7 +90,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private DatabaseReference mUserListsRef;
     private DatabaseReference mUserItemsRef;
     private FirebaseRecyclerAdapter mOwnListAdapter;
-    private GoogleApiClient mGoogleApiClient;
     private AdView mAdView;
 
     @Override
@@ -117,13 +121,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         ownLayoutManager.setAutoMeasureEnabled(true);
         mOwnListsRecyclerView.setLayoutManager(ownLayoutManager);
 
-        // Create an auto-managed GoogleApiClient with access to App Invites.
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(AppInvite.API)
-                .enableAutoManage(this, this)
-                .build();
-
-
         //DatabaseReference mUserListsRef = FirebaseDatabase.getInstance().getReference().child("Users");
 
         mAuthStateListener = new FirebaseAuth.AuthStateListener() {
@@ -152,61 +149,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             }
         };
 
-        AppInvite.AppInviteApi.getInvitation(mGoogleApiClient, this, true).setResultCallback(
-                new ResultCallback<AppInviteInvitationResult>() {
-                    @Override
-                    public void onResult(AppInviteInvitationResult result) {
-                        if (result.getStatus().isSuccess()) {
-                            // Extract information from the intent
-                            Intent intent = result.getInvitationIntent();
-                            String deepLink = AppInviteReferral.getDeepLink(intent);
-                            AppInviteReferral.getInvitationId(intent);
 
-                            // Because autoLaunchDeepLink = true we don't have to do anything
-                            // here, but we could set that to false and manually choose
-                            // an Activity to launch to handle the deep link here.
-                            // ...
-                            try {
-                                deepLink = URLDecoder.decode(deepLink, "UTF-8");
-                            } catch (UnsupportedEncodingException e) {
-                                e.printStackTrace();
-                            }
-                            Uri uri = Uri.parse(deepLink);
-                            String userID = uri.getQueryParameter("UserID"); //TODO is it needed?
-                            final String listID = uri.getQueryParameter("ListID"); //TODO change name
-                            if (userID == null || listID == null)
-                                return;
-                            //Toast.makeText(MainActivity.this, "UserID= " +userID + "ListID= " + listID, Toast.LENGTH_LONG).show();
-
-
-                            //add new item name to SList
-                            final DatabaseReference  userRef = mDatabaseReference.child(USERS).child(mUserID).child(LISTS);
-                            userRef.orderByChild("listID").equalTo(listID).addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                    if(dataSnapshot.getValue() != null) {
-                                        Toast.makeText(MainActivity.this, "List already exists!", Toast.LENGTH_SHORT).show();
-                                    } else {
-                                        userRef.push().setValue(new ListForUser(listID));
-
-                                        DatabaseReference ref = mDatabaseReference.child(LISTS).child(listID);
-                                        ref.child(USERS).child(mUserID).setValue("user");
-
-                                        //update ListView adapter
-                                        mOwnListAdapter.notifyDataSetChanged();
-                                        Toast.makeText(MainActivity.this, "Adding sucessful!", Toast.LENGTH_SHORT).show();
-                                    }
-                                }
-
-                                @Override
-                                public void onCancelled(DatabaseError databaseError) {
-
-                                }
-                            });
-
-                        }
-                    }
-                });
                 //DatabaseReference mUserListsRef = FirebaseDatabase.getInstance().getReference().child("Users");
 
         setupSharedPreferences();
@@ -393,6 +336,77 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     @Override
     protected void onResume() {
         super.onResume();
+        FirebaseDynamicLinks.getInstance().getDynamicLink(getIntent())
+                .addOnSuccessListener(this, new OnSuccessListener<PendingDynamicLinkData>() {
+                    @Override
+                    public void onSuccess(PendingDynamicLinkData data) {
+                        if (data == null) {
+                            Log.d(TAG, "getInvitation: no data");
+                            return;
+                        }
+
+                        // Get the deep link
+                        Uri deepLink = data.getLink();
+
+                        // Extract invite
+                        FirebaseAppInvite invite = FirebaseAppInvite.getInvitation(data);
+                        if (invite != null) {
+                            String invitationId = invite.getInvitationId();
+                        }
+
+                        // Handle the deep link
+                        // [START_EXCLUDE]
+                        Log.d(TAG, "deepLink:" + deepLink);
+                        if (deepLink != null) {
+
+                            String userID = deepLink.getQueryParameter("UserID"); //TODO is it needed?
+                            final String listID = deepLink.getQueryParameter("ListID"); //TODO change name
+                            if (userID == null || listID == null)
+                                return;
+                            //Toast.makeText(MainActivity.this, "UserID= " +userID + "ListID= " + listID, Toast.LENGTH_LONG).show();
+
+                            mDatabaseReference.child(LISTS).orderByChild("listID").equalTo(listID).addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    if (dataSnapshot.getValue() == null) {
+                                        Toast.makeText(MainActivity.this, "List not exists!", Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        //add new item name to SList
+                                        final DatabaseReference  userRef = mDatabaseReference.child(USERS).child(mUserID).child(LISTS);
+                                        userRef.orderByChild("listID").equalTo(listID).addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                                if(dataSnapshot.getValue() != null) {
+                                                    Toast.makeText(MainActivity.this, "List already exists!", Toast.LENGTH_SHORT).show();
+                                                } else {
+                                                    userRef.push().setValue(new ListForUser(listID));
+
+                                                    DatabaseReference ref = mDatabaseReference.child(LISTS).child(listID);
+                                                    ref.child(USERS).child(mUserID).setValue("user");
+
+                                                    //update ListView adapter
+                                                    mOwnListAdapter.notifyDataSetChanged();
+                                                    Toast.makeText(MainActivity.this, "Adding sucessful!", Toast.LENGTH_SHORT).show();
+                                                }
+                                            }
+
+                                            @Override
+                                            public void onCancelled(DatabaseError databaseError) {
+
+                                            }
+                                        });
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
+                        }
+                    }
+                });
+
         mFirebaseAuth.addAuthStateListener(mAuthStateListener);
     }
 
@@ -417,7 +431,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
+        Log.d(TAG, "onConnectionFailed:" + connectionResult);
     }
 
     private void setupSharedPreferences() {
@@ -506,6 +520,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         sendIntent.putExtra(Intent.EXTRA_TEXT, msg);
         sendIntent.setType("text/plain");
         context.startActivity(sendIntent);
+
+      /*  Intent intent = new AppInviteInvitation.IntentBuilder("share list")
+                .setMessage("Hey, check this out: ")
+                .setDeepLink(deepLink)
+                .build();
+        context.startActivity(intent);*/
     }
 
     private class DeleteOnClickListener implements View.OnClickListener
