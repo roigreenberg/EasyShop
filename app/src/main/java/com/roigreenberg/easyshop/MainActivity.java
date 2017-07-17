@@ -41,6 +41,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.storage.FirebaseStorage;
@@ -259,19 +260,24 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 ListHolder.class,
                 mUserListsRef) {
             @Override
-            protected void populateViewHolder(final ListHolder listHolder, ListForUser list, int position) {
+            protected void populateViewHolder(final ListHolder listHolder, final ListForUser list, final int position) {
 
                 final String listID = list.getListID();
 
                 final DatabaseReference listsRef = mDatabaseReference.child(LISTS).child(listID);
+                Log.d("RROI", "in pop " + listsRef);
 
                 listsRef.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         final SList listData = dataSnapshot.getValue(SList.class);
-                        listHolder.setName(listData.getListName());
+                        String listName = listData.getListName();
+                        if (listName == null)
+                            listName = "name is missing";
+                        listHolder.setName(listName);
                         listHolder.setNameSize(mTextSize);
-                        listHolder.setShareOnClick(new ShareOnClickListener(mUserID, listID, listData.getListName()));
+                        listHolder.setShareOnClick(new ShareOnClickListener(mUserID, listID, listName));
+                        listHolder.setDeleteOnClick(new DeleteOnClickListener(position, mUserID, listID, listName));
                         listHolder.mListNameField.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
@@ -459,11 +465,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     };
 
-    public class ShareOnClickListener implements View.OnClickListener
+    private class ShareOnClickListener implements View.OnClickListener
     {
 
         final String userId, listId, listName;
-        public ShareOnClickListener(final String userId, final String listId, final String listName) {
+        ShareOnClickListener(final String userId, final String listId, final String listName) {
 
             this.userId = userId;
             this.listId = listId;
@@ -502,7 +508,112 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         context.startActivity(sendIntent);
     }
 
+    private class DeleteOnClickListener implements View.OnClickListener
+    {
+        final String userId, listId, listName;
+        int position;
+        DeleteOnClickListener(int position, final String userId, final String listId, final String listName) {
 
+            this.userId = userId;
+            this.listId = listId;
+            this.listName = listName;
+            this.position = position;
+        }
+
+        @Override
+        public void onClick(View v) {
+            showDeleteDialog(position, listName, userId, listId);
+        }
+    }
+
+    private void showDeleteDialog(final int position, final String listName, final String userID, final String listID) {
+        final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = this.getLayoutInflater();
+        //final View dialogView = inflater.inflate(R.layout.layout_add_list_dialog, null, false);
+        //dialogBuilder.setView(dialogView);
+        final boolean[] last = {false};
+
+        dialogBuilder.setTitle(getResources().getString(R.string.delete_message) + " \"" + listName + "\"?");
+        final DatabaseReference listRef = mDatabaseReference.child(LISTS).child(listID);
+        listRef.child(USERS).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getChildrenCount() == 1) {
+                    dialogBuilder.setMessage(getResources().getString(R.string.full_list_delete_message));
+                    last[0] = true;
+                }
+                //put everything here?!
+                AlertDialog b = dialogBuilder.create();
+                b.show();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        dialogBuilder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                if (last[0]) {
+
+                    listRef.child(ITEMS).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            for (DataSnapshot item: dataSnapshot.getChildren()) {
+                                String itemID = null;
+                                for (DataSnapshot d: item.getChildren()) {
+                                    if (d.getKey().equals("itemID"))
+                                        itemID = d.getValue().toString();
+                                    }
+                                if (itemID != null) {
+                                    Log.d("RROI", mDatabaseReference.child(ITEMS).child(itemID).toString());
+                                    mDatabaseReference.child(ITEMS).child(itemID).setValue(null);
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+
+                    Log.d("RROI", "delete " + listRef);
+
+                    listRef.setValue(null);
+                } else {
+                    listRef.child(USERS).child(userID).removeValue();
+                }
+
+                DatabaseReference ref = mDatabaseReference.child(USERS).child(userID).child(LISTS);
+                Query queryRef = ref.getRef().orderByChild("listID").equalTo(listID);
+                queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        Log.d("RROI", "l " + dataSnapshot.getChildren().iterator().next().getRef());
+                        dataSnapshot.getChildren().iterator().next().getRef().setValue(null);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
+
+
+                Toast.makeText(MainActivity.this, listName + " deleted", Toast.LENGTH_SHORT).show();
+
+            }
+        });
+        dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                //do nothing, just close this dialog
+            }
+        });
+
+    }
 
 
     /**

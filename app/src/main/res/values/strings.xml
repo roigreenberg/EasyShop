@@ -31,6 +31,8 @@
     <string name="tv_collaps_extra_details">Hide extra details..</string>
     <string name="remove_from_list">Remove from list</string>
     <string name="add_to_list">Add to list</string>
+    <string name="delete_message">Are you sure you want to delete</string>
+    <string name="full_list_delete_message">Note: You are the only user. The list will erase from database.</string>
 
 
 </resources>

@@ -403,7 +403,8 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
                                 public void onCancelled(DatabaseError databaseError) {
 
                                 }
-                            });                            itemAdapter.getRef(i).setValue(null);
+                            });
+                            itemAdapter.getRef(i).setValue(null);
                         }
                     }
                     for (int i = mDoneRecyclerView.getAdapter().getItemCount() - 1; i >= 0; i--) {

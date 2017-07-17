@@ -1,12 +1,12 @@
 <resources>
     <string name="app_name">איזי-שופ</string>
-    <string name="add_new_list">Add new list</string>
+    <string name="add_new_list">הוסף רשימה חדשה</string>
     <string name="sign_out">התנתק</string>
-    <string name="edit_item_name_description">Name</string>
-    <string name="edit_item_brand_description">Brand..</string>
-    <string name="edit_item_weight_description">Weight..</string>
+    <string name="edit_item_name_description">שם</string>
+    <string name="edit_item_brand_description">מותג..</string>
+    <string name="edit_item_weight_description">משקל/נפח..</string>
     <string name="add_button">ADD</string>
-    <string name="add_item_activity_name">Add a New Item</string>
+    <string name="add_item_activity_name">הוסף מוצג חדש</string>
     <string name="share">Share</string>
     <string name="action_settings">הגדרות</string>
     <string name="title_activity_settings">הגדרות</string>
@@ -23,6 +23,8 @@
     <string name="tv_collaps_extra_details">סגור..</string>
     <string name="remove_from_list">הסר מהרשימה</string>
     <string name="add_to_list">הוסף לרשימה</string>
+    <string name="delete_message">האם אתה בטוח שברצונך למחוק</string>
+    <string name="full_list_delete_message">שים לב: אתה המשתמש היחיד. הרשימה תוסר ממאגר הנתונים.</string>
 
 
 </resources>
