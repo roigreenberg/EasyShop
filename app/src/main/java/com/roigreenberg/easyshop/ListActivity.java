@@ -74,7 +74,8 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
         }
 
         mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_items);
-        mRecyclerView.setHasFixedSize(false);
+        mRecyclerView.setNestedScrollingEnabled(false);
+       // mRecyclerView.setHasFixedSize(false);
         RecyclerView.LayoutManager ownLayoutManager = new LinearLayoutManager
                 (this, LinearLayoutManager.VERTICAL, false);
         ownLayoutManager.setAutoMeasureEnabled(true);
@@ -104,7 +105,8 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
         });
 
         mDoneRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_done_items);
-        mDoneRecyclerView.setHasFixedSize(false);
+        //mDoneRecyclerView.setHasFixedSize(false);
+        mDoneRecyclerView.setNestedScrollingEnabled(false);
         RecyclerView.LayoutManager doneLayoutManager = new LinearLayoutManager
                 (this, LinearLayoutManager.VERTICAL, false);
         doneLayoutManager.setAutoMeasureEnabled(true);

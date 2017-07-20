@@ -122,6 +122,7 @@ public  class ItemAdapter extends SelectableItemAdapter {
             this.context = context;
             //this.mID = (TextView) itemView.findViewById(R.id.tv_list_name);
             this.mName = (TextView) itemView.findViewById(R.id.tv_item_name);
+            this.mName.setSelected(true);
             this.mBrand = (TextView) itemView.findViewById(R.id.tv_item_brand);
             this.mWeight = (TextView) itemView.findViewById(R.id.tv_item_weight_volume);
             this.mVolume = (TextView) itemView.findViewById(R.id.tv_item_weight_volume);
