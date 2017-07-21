@@ -33,6 +33,9 @@
     <string name="add_to_list">Add to list</string>
     <string name="delete_message">Are you sure you want to delete</string>
     <string name="full_list_delete_message">Note: You are the only user. The list will erase from database.</string>
+    <string name="item_name" translatable="false">Name</string>
+    <string name="item_quantity" translatable="false">Quantity</string>
+    <string name="item_assignee" translatable="false">Assignee</string>
 
 
 </resources>

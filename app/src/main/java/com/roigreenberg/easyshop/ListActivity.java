@@ -210,9 +210,7 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
     @Override
     public boolean onItemLongClicked(boolean doneList, int position) {
         if (actionMode == null) {
-            selectionMode = true;
-            itemAdapter.notifyDataSetChanged();
-            doneItemAdapter.notifyDataSetChanged();
+            setSelectedMode(true);
             actionMode = startSupportActionMode(actionModeCallback);
 
         }
@@ -243,9 +241,7 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
                 doneItemAdapter.getSelectedItemCount();
 
         if (count == 0) {
-            selectionMode = false;
-            itemAdapter.notifyDataSetChanged();
-            doneItemAdapter.notifyDataSetChanged();
+            setSelectedMode(false);
             actionMode.finish();
         } else {
             actionMode.setTitle(String.valueOf(count));
@@ -391,7 +387,7 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
                 case R.id.menu_remove:
                     // TODO: actually remove items
                     final DatabaseReference items = FirebaseDatabase.getInstance().getReference().child(ITEMS);
-                    for (int i = mRecyclerView.getAdapter().getItemCount() - 1; i >= 0; i--) {
+                    for (int i = itemAdapter.getItemCount() - 1; i >= 0; i--) {
                         ItemAdapter.ItemHolder itemHolder = (ItemAdapter.ItemHolder) mRecyclerView.findViewHolderForAdapterPosition(i);
                         if (itemAdapter.isSelected(i)){
                             itemAdapter.getRef(i).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -409,7 +405,7 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
                             itemAdapter.getRef(i).setValue(null);
                         }
                     }
-                    for (int i = mDoneRecyclerView.getAdapter().getItemCount() - 1; i >= 0; i--) {
+                    for (int i = doneItemAdapter.getItemCount() - 1; i >= 0; i--) {
                         ItemAdapter.ItemHolder itemHolder = (ItemAdapter.ItemHolder) mDoneRecyclerView.findViewHolderForAdapterPosition(i);
                         if (doneItemAdapter.isSelected(i)){
                             doneItemAdapter.getRef(i).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -428,9 +424,7 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
                             doneItemAdapter.getRef(i).setValue(null);
                         }
                     }
-                    selectionMode = false;
-                    itemAdapter.notifyDataSetChanged();
-                    doneItemAdapter.notifyDataSetChanged();
+                    setSelectedMode(false);
                     mode.finish();
                     return true;
                 case R.id.menu_users_picker:
@@ -484,10 +478,21 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
         public void onDestroyActionMode(ActionMode mode) {
             itemAdapter.clearSelection();
             doneItemAdapter.clearSelection();
-            selectionMode = false;
-            itemAdapter.notifyDataSetChanged();
-            doneItemAdapter.notifyDataSetChanged();
+            setSelectedMode(false);
             actionMode = null;
+        }
+    }
+
+    public void setSelectedMode(boolean isSelectedMode) {
+        selectionMode = isSelectedMode;
+        for (int i = itemAdapter.getItemCount() - 1; i >= 0; i--) {
+            ItemAdapter.ItemHolder itemHolder = (ItemAdapter.ItemHolder) mRecyclerView.findViewHolderForAdapterPosition(i);
+            itemHolder.setSelectedMode();
+        }
+
+        for (int i = doneItemAdapter.getItemCount() - 1; i >= 0; i--) {
+            ItemAdapter.ItemHolder itemHolder = (ItemAdapter.ItemHolder) mDoneRecyclerView.findViewHolderForAdapterPosition(i);
+            itemHolder.setSelectedMode();
         }
     }
 }

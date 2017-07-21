@@ -94,6 +94,8 @@ public  class ItemAdapter extends SelectableItemAdapter {
         });
     }
 
+
+
     public static class ItemHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener  {
 
         public static final int BOUGHT = 0;
@@ -110,6 +112,7 @@ public  class ItemAdapter extends SelectableItemAdapter {
         private final ImageButton mImageButton;
         private boolean showExtraDetails = false;
         private boolean doneList;
+        private boolean isBrand, isWeight;
 
         private ClickListener mClickListener;
 
@@ -168,8 +171,8 @@ public  class ItemAdapter extends SelectableItemAdapter {
             this.itemInListRef = itemInListRef;
             Log.d("RROI", "" + item.getName());
             setName(item.getName());
-            boolean isBrand = setBrand(item.getBrand());
-            boolean isWeight = setWeight(item.getWeight());
+            isBrand = setBrand(item.getBrand());
+            isWeight = setWeight(item.getWeight());
 
             setVolume(item.getVolume());
             setAssignee(itemInList.getAssignee());
@@ -187,6 +190,14 @@ public  class ItemAdapter extends SelectableItemAdapter {
             } else {
                 itemView.setBackgroundResource(R.color.transparent);
             }
+
+            setSelectedMode();
+
+
+
+        }
+
+        public void setSelectedMode() {
             if (isSelectionMode()) {
                 if (mExtraDetails.getVisibility() != View.GONE) {
                     mExtraDetails.setVisibility(View.GONE);
@@ -220,11 +231,7 @@ public  class ItemAdapter extends SelectableItemAdapter {
                     mImageButton.setBackgroundResource(R.drawable.ic_remove_shopping_cart_black_24dp);
                 }
             }
-
-
-
         }
-
 
         public void setName(String value) {
             mName.setText(value);
