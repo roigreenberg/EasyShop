@@ -36,6 +36,10 @@
             android:label="@string/add_item_activity_name"
             android:windowSoftInputMode="stateAlwaysVisible"/>
         <activity
+            android:name=".EditItemActivity"
+            android:label="@string/add_item_activity_name"
+            android:windowSoftInputMode="stateAlwaysVisible"/>
+        <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"
             android:parentActivityName=".MainActivity">
@@ -46,7 +50,11 @@
         <activity
             android:name=".ListActivity"
             android:label="@string/title_activity_list"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
     </application>
 
 </manifest>

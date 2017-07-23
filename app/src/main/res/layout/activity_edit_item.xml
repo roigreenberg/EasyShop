@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    This vertical linear layout contains all the views in the AddTaskActivity code.
+    This includes an EditText to add a task description, and buttons to select a priority
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingEnd="@dimen/activity_horizontal_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingStart="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin">
+
+    <!-- EditText for getting task description input -->
+
+    <include layout="@layout/activity_edit_item_main">
+
+    </include>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="onClickEditItemExtraDetails"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/edit_item_extra_details_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:paddingBottom="16dp"
+            android:paddingTop="4dp"
+            android:text="@string/add_item_extra_details_text"
+            android:textIsSelectable="false"
+            android:textSize="18sp" />
+
+        <ImageView
+            android:id="@+id/ib_edit_item_extra_details"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="0"
+            app:srcCompat="@android:drawable/arrow_down_float"
+            android:contentDescription="@string/Extra_details"/>
+
+    </LinearLayout>
+
+
+    <include layout="@layout/activity_edit_item_extra_details"
+        android:id="@+id/edit_item_extra_details"
+        android:visibility="gone">
+
+    </include>
+
+
+    <!-- Add button -->
+    <Button
+        android:id="@+id/editApplyButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="@string/edit_apply_button"
+        style="@style/TextAppearance.AppCompat.Large"
+        android:textColor="@android:color/primary_text_dark"
+        android:background="@color/colorPrimary"
+        android:onClick="onClickEditItem"/>
+
+</LinearLayout>

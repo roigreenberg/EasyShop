@@ -25,6 +25,8 @@
     <string name="add_to_list">הוסף לרשימה</string>
     <string name="delete_message">האם אתה בטוח שברצונך למחוק</string>
     <string name="full_list_delete_message">שים לב: אתה המשתמש היחיד. הרשימה תוסר ממאגר הנתונים.</string>
+    <string name="edit_apply_button">אישור</string>
+    <string name="edit_item">ערוך</string>
 
 
 </resources>

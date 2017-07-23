@@ -46,6 +46,7 @@ import static com.roigreenberg.easyshop.MainActivity.mUserID;
 
 public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemHolder.ClickListener{
 
+    private static final int EDIT_REQUEST = 100;
     private RecyclerView mRecyclerView, mDoneRecyclerView;
     private DatabaseReference listRef;
     private Query query;
@@ -169,6 +170,15 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
     }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == EDIT_REQUEST) { //TODO end this. only when actual change, with pos
+            itemAdapter.notifyDataSetChanged();
+            doneItemAdapter.notifyDataSetChanged();
+        }
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.list_menu, menu);
@@ -212,7 +222,6 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
         if (actionMode == null) {
             setSelectedMode(true);
             actionMode = startSupportActionMode(actionModeCallback);
-
         }
 
         toggleSelection(doneList, position);
@@ -237,17 +246,31 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
             doneItemAdapter.toggleSelection(position);
         else
             itemAdapter.toggleSelection(position);
-        int count = itemAdapter.getSelectedItemCount() +
-                doneItemAdapter.getSelectedItemCount();
+        int count = selectionCount();
 
-        if (count == 0) {
+
+
+        if (selectionCount() == 0) {
             setSelectedMode(false);
             actionMode.finish();
         } else {
             actionMode.setTitle(String.valueOf(count));
             actionMode.invalidate();
+            actionMode.getMenu().findItem(R.id.menu_edit_item);
+            MenuItem edit = actionMode.getMenu().findItem(R.id.menu_edit_item);
+            if (selectionCount() == 1) {
+                edit.setVisible(true);
+            } else {
+                edit.setVisible(false);
+            }
         }
     }
+
+    private int selectionCount() {
+        return itemAdapter.getSelectedItemCount() +
+                doneItemAdapter.getSelectedItemCount();
+    }
+
 
     private class ActionModeCallback implements ActionMode.Callback {
         @SuppressWarnings("unused")
@@ -266,7 +289,7 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
             listRef.child(USERS).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    Toast.makeText(ListActivity.this, dataSnapshot.getKey().toString(),Toast.LENGTH_LONG);
+                    Toast.makeText(ListActivity.this, dataSnapshot.getKey(),Toast.LENGTH_LONG).show();
                     // Is better to use a List, because you don't know the size
                     // of the iterator returned by dataSnapshot.getChildren() to
                     // initialize the array
@@ -382,7 +405,7 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
         }
 
         @Override
-        public boolean onActionItemClicked(final ActionMode mode, MenuItem item) {
+        public boolean onActionItemClicked(final ActionMode mode, final MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.menu_remove:
                     // TODO: actually remove items
@@ -429,6 +452,42 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
                     return true;
                 case R.id.menu_users_picker:
                     showAssigningDialog(mode);
+                    return true;
+
+                case R.id.menu_edit_item:
+                    int pos;
+                    ItemAdapter adapter;
+                    final DatabaseReference itemRef;
+                    if (itemAdapter.getSelectedItemCount() == 1 && doneItemAdapter.getSelectedItemCount() == 0) {
+                        adapter = itemAdapter;
+                    } else if (itemAdapter.getSelectedItemCount() == 0 && doneItemAdapter.getSelectedItemCount() == 1) {
+                        adapter = doneItemAdapter;
+                    } else {
+                        setSelectedMode(false);
+                        mode.finish();
+                        return true;
+                    }
+                    pos = adapter.getSelectedItems().get(0);
+                    itemRef = adapter.getRef(pos).child("itemID");
+                    itemRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            String itemID = (String) dataSnapshot.getValue();
+                            Intent editItemIntent = new Intent(ListActivity.this, EditItemActivity.class);
+                            editItemIntent.putExtra("EXTRA_REF", itemID);
+                            startActivityForResult(editItemIntent, EDIT_REQUEST);
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+
+
+
+                    setSelectedMode(false);
+                    mode.finish();
                     return true;
 
                 default:

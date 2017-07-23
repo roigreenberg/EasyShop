@@ -36,6 +36,8 @@
     <string name="item_name" translatable="false">Name</string>
     <string name="item_quantity" translatable="false">Quantity</string>
     <string name="item_assignee" translatable="false">Assignee</string>
+    <string name="edit_apply_button">Apply</string>
+    <string name="edit_item">Edit</string>
 
 
 </resources>
