@@ -12,23 +12,31 @@ import android.os.Bundle;
 import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.appinvite.AppInvite;
+import com.google.android.gms.appinvite.AppInviteInvitation;
 import com.google.android.gms.appinvite.AppInviteInvitationResult;
 import com.google.android.gms.appinvite.AppInviteReferral;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.appinvite.FirebaseAppInvite;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -36,7 +44,10 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
+import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -56,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     public static final String LISTS = "Lists";
     public static final String USERS = "Users";
     public static final String SHARED_LISTS = "SharedLists";
+    private static final java.lang.String ADMOB_APP_ID = "ca-app-pub-4002826927033249~5513754216";
     private RecyclerView mOwnListsRecyclerView, mSharedListsRecyclerView;
 
     public static String mUsername;
@@ -64,8 +76,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     public Float mTextSize;
 
     // Firebase instance variables
-    private FirebaseDatabase mFirebaseDatabase;
-    private DatabaseReference mMessagesDatabaseReference;
+    private static FirebaseDatabase mFirebaseDatabase = null;
+    private static DatabaseReference mDatabaseReference;
     private ChildEventListener mChildEventListener;
     private FirebaseAuth mFirebaseAuth;
     private FirebaseAuth.AuthStateListener mAuthStateListener;
@@ -78,19 +90,24 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private DatabaseReference mUserListsRef;
     private DatabaseReference mUserItemsRef;
     private FirebaseRecyclerAdapter mOwnListAdapter;
-    private GoogleApiClient mGoogleApiClient;
+    private AdView mAdView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         mUsername = ANONYMOUS;
 
         mTextSize = Float.parseFloat(getString(R.string.pref_size_default));
 
+        if (mFirebaseDatabase == null) {
+            Toast.makeText(this, "here", Toast.LENGTH_LONG);
+            FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+            mFirebaseDatabase = FirebaseDatabase.getInstance();
+            mDatabaseReference = mFirebaseDatabase.getReference();
+        }
         // Initialize Firebase components
-        mFirebaseDatabase = FirebaseDatabase.getInstance();
+
         mFirebaseAuth = FirebaseAuth.getInstance();
         //mFirebaseStorage = FirebaseStorage.getInstance();
         //mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
@@ -104,13 +121,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         ownLayoutManager.setAutoMeasureEnabled(true);
         mOwnListsRecyclerView.setLayoutManager(ownLayoutManager);
 
-        // Create an auto-managed GoogleApiClient with access to App Invites.
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(AppInvite.API)
-                .enableAutoManage(this, this)
-                .build();
-
-
         //DatabaseReference mUserListsRef = FirebaseDatabase.getInstance().getReference().child("Users");
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         mAuthStateListener = new FirebaseAuth.AuthStateListener() {
@@ -119,7 +129,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null){
                     mUsername = user.getDisplayName();
-                    onSignedInInitialize(user.getDisplayName());
+                    Log.d("RROI", mUsername);
+                    onSignedInInitialize();
 
                 } else {
                     onSignedOutCleanup();
@@ -138,54 +149,23 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             }
         };
 
-        AppInvite.AppInviteApi.getInvitation(mGoogleApiClient, this, true).setResultCallback(
-                new ResultCallback<AppInviteInvitationResult>() {
-                    @Override
-                    public void onResult(AppInviteInvitationResult result) {
-                        if (result.getStatus().isSuccess()) {
-                            // Extract information from the intent
-                            Intent intent = result.getInvitationIntent();
-                            String deepLink = AppInviteReferral.getDeepLink(intent);
-                            AppInviteReferral.getInvitationId(intent);
 
-                            // Because autoLaunchDeepLink = true we don't have to do anything
-                            // here, but we could set that to false and manually choose
-                            // an Activity to launch to handle the deep link here.
-                            // ...
-                            try {
-                                deepLink = URLDecoder.decode(deepLink, "UTF-8");
-                            } catch (UnsupportedEncodingException e) {
-                                e.printStackTrace();
-                            }
-                            Uri uri = Uri.parse(deepLink);
-                            String userID = uri.getQueryParameter("UserID"); //TODO is it needed?
-                            String listID = uri.getQueryParameter("ListID"); //TODO change name
-                            if (userID == null || listID == null)
-                                return;
-                            Toast.makeText(MainActivity.this, "UserID= " +userID + "ListID= " + listID, Toast.LENGTH_LONG).show();
-
-
-                            //add new item name to SList
-                            DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child(USERS).child(mUserID).child(LISTS).push();
-                            userRef.setValue(new ListForUser(listID));
-
-                            DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child(LISTS).child(listID);
-                            ref.child(USERS).child(mUserID).setValue("user");
-
-                            //update ListView adapter
-                            mOwnListAdapter.notifyDataSetChanged();
-                            Toast.makeText(MainActivity.this, "Adding sucessful!", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
                 //DatabaseReference mUserListsRef = FirebaseDatabase.getInstance().getReference().child("Users");
 
         setupSharedPreferences();
+
+        MobileAds.initialize(this, ADMOB_APP_ID);
+        mAdView = (AdView) findViewById(R.id.av_main);
+        AdRequest adRequest = new AdRequest.Builder()
+                .addTestDevice("AB840131C8782DD57088B9B95755DBDB")
+                .build();
+        mAdView.loadAd(adRequest);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        Log.d(TAG, String.valueOf(requestCode));
         if (requestCode == RC_SIGN_IN) {
             if (resultCode == RESULT_OK) {
                 // Sign-in succeeded, set up the UI
@@ -198,19 +178,20 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         }
     }
 
-    private void onSignedInInitialize(String username) {
+    private void onSignedInInitialize() {
         showLoading();
 
-        mUsername = username;
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         mUserID = user.getUid();
 
-        mUserListsRef = FirebaseDatabase.getInstance().getReference()
+        mDatabaseReference.child(USERS).child(mUserID).child("Name").setValue(mUsername);
+
+        mUserListsRef = mDatabaseReference
                 .child(USERS)
                 .child(mUserID)
                 .child(LISTS);
 
-        mUserItemsRef = FirebaseDatabase.getInstance().getReference()
+        mUserItemsRef = mDatabaseReference
                 .child(USERS)
                 .child(mUserID)
                 .child(ITEMS);
@@ -222,19 +203,24 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 ListHolder.class,
                 mUserListsRef) {
             @Override
-            protected void populateViewHolder(final ListHolder listHolder, ListForUser list, int position) {
+            protected void populateViewHolder(final ListHolder listHolder, final ListForUser list, final int position) {
 
                 final String listID = list.getListID();
 
-                final DatabaseReference listsRef = FirebaseDatabase.getInstance().getReference().child(LISTS).child(listID);
+                final DatabaseReference listsRef = mDatabaseReference.child(LISTS).child(listID);
+                Log.d("RROI", "in pop " + listsRef);
 
                 listsRef.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         final SList listData = dataSnapshot.getValue(SList.class);
-                        listHolder.setName(listData.getListName());
+                        String listName = listData.getListName();
+                        if (listName == null)
+                            listName = "name is missing";
+                        listHolder.setName(listName);
                         listHolder.setNameSize(mTextSize);
-                        listHolder.setShareOnClick(new ShareOnClickListener(mUserID, listID, listData.getListName()));
+                        listHolder.setShareOnClick(new ShareOnClickListener(mUserID, listID, listName));
+                        listHolder.setDeleteOnClick(new DeleteOnClickListener(position, mUserID, listID, listName));
                         listHolder.mListNameField.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
@@ -243,6 +229,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                                 startActivity(ListIntent);
                             }
                         });
+
 
                     }
 
@@ -309,8 +296,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         final EditText editText = (EditText) dialogView.findViewById(R.id.et_add_list);
 
-        dialogBuilder.setTitle("Adding new SList");
-        dialogBuilder.setMessage("Input a SList name");
+        // show soft keyboard
+        editText.requestFocus();
+
+
+        dialogBuilder.setTitle("Adding new list");
+        dialogBuilder.setMessage("Input a list name");
 
         dialogBuilder.setPositiveButton("Done", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
@@ -319,11 +310,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 } else {
 
                     //add new item name to SList
-                    DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child(LISTS).push();
+                    DatabaseReference ref = mDatabaseReference.child(LISTS).push();
                     ref.setValue(new SList(ref.getKey(), editText.getText().toString().trim()));
                     ref.child(USERS).child(mUserID).setValue("admin");
 
-                    DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child(USERS).child(mUserID).child(LISTS).push();
+                    DatabaseReference userRef = mDatabaseReference.child(USERS).child(mUserID).child(LISTS).push();
                     userRef.setValue(new ListForUser(ref.getKey()));
 
 
@@ -339,12 +330,84 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             }
         });
         AlertDialog b = dialogBuilder.create();
+        b.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         b.show();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        FirebaseDynamicLinks.getInstance().getDynamicLink(getIntent())
+                .addOnSuccessListener(this, new OnSuccessListener<PendingDynamicLinkData>() {
+                    @Override
+                    public void onSuccess(PendingDynamicLinkData data) {
+                        if (data == null) {
+                            Log.d(TAG, "getInvitation: no data");
+                            return;
+                        }
+
+                        // Get the deep link
+                        Uri deepLink = data.getLink();
+
+                        // Extract invite
+                        FirebaseAppInvite invite = FirebaseAppInvite.getInvitation(data);
+                        if (invite != null) {
+                            String invitationId = invite.getInvitationId();
+                        }
+
+                        // Handle the deep link
+                        // [START_EXCLUDE]
+                        Log.d(TAG, "deepLink:" + deepLink);
+                        if (deepLink != null) {
+
+                            String userID = deepLink.getQueryParameter("UserID"); //TODO is it needed?
+                            final String listID = deepLink.getQueryParameter("ListID"); //TODO change name
+                            if (userID == null || listID == null)
+                                return;
+                            //Toast.makeText(MainActivity.this, "UserID= " +userID + "ListID= " + listID, Toast.LENGTH_LONG).show();
+
+                            mDatabaseReference.child(LISTS).orderByChild("listID").equalTo(listID).addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    if (dataSnapshot.getValue() == null) {
+                                        Toast.makeText(MainActivity.this, "List not exists!", Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        //add new item name to SList
+                                        final DatabaseReference  userRef = mDatabaseReference.child(USERS).child(mUserID).child(LISTS);
+                                        userRef.orderByChild("listID").equalTo(listID).addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                                if(dataSnapshot.getValue() != null) {
+                                                    Toast.makeText(MainActivity.this, "List already exists!", Toast.LENGTH_SHORT).show();
+                                                } else {
+                                                    userRef.push().setValue(new ListForUser(listID));
+
+                                                    DatabaseReference ref = mDatabaseReference.child(LISTS).child(listID);
+                                                    ref.child(USERS).child(mUserID).setValue("user");
+
+                                                    //update ListView adapter
+                                                    mOwnListAdapter.notifyDataSetChanged();
+                                                    Toast.makeText(MainActivity.this, "Adding sucessful!", Toast.LENGTH_SHORT).show();
+                                                }
+                                            }
+
+                                            @Override
+                                            public void onCancelled(DatabaseError databaseError) {
+
+                                            }
+                                        });
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
+                        }
+                    }
+                });
+
         mFirebaseAuth.addAuthStateListener(mAuthStateListener);
     }
 
@@ -361,14 +424,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mOwnListAdapter.cleanup();
+        if (mOwnListAdapter != null)
+            mOwnListAdapter.cleanup();
         PreferenceManager.getDefaultSharedPreferences(this)
                 .unregisterOnSharedPreferenceChangeListener(this);
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
+        Log.d(TAG, "onConnectionFailed:" + connectionResult);
     }
 
     private void setupSharedPreferences() {
@@ -410,17 +474,17 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         {
             Intent addItemIntent = new Intent(MainActivity.this, AddItemActivity.class);
             addItemIntent.putExtra("EXTRA_REF", ref.toString().substring(
-                    FirebaseDatabase.getInstance().getReference().toString().length()));
+                    mDatabaseReference.toString().length()));
             startActivity(addItemIntent);
         }
 
     };
 
-    public class ShareOnClickListener implements View.OnClickListener
+    private class ShareOnClickListener implements View.OnClickListener
     {
 
         final String userId, listId, listName;
-        public ShareOnClickListener(final String userId, final String listId, final String listName) {
+        ShareOnClickListener(final String userId, final String listId, final String listName) {
 
             this.userId = userId;
             this.listId = listId;
@@ -430,7 +494,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         @Override
         public void onClick(View v)
         {
-            ShareList(getBaseContext(), userId, listId);
+            ShareList(v.getContext(), userId, listId);
         }
 
     };
@@ -457,9 +521,120 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         sendIntent.putExtra(Intent.EXTRA_TEXT, msg);
         sendIntent.setType("text/plain");
         context.startActivity(sendIntent);
+
+      /*  Intent intent = new AppInviteInvitation.IntentBuilder("share list")
+                .setMessage("Hey, check this out: ")
+                .setDeepLink(deepLink)
+                .build();
+        context.startActivity(intent);*/
     }
 
+    private class DeleteOnClickListener implements View.OnClickListener
+    {
+        final String userId, listId, listName;
+        int position;
+        DeleteOnClickListener(int position, final String userId, final String listId, final String listName) {
 
+            this.userId = userId;
+            this.listId = listId;
+            this.listName = listName;
+            this.position = position;
+        }
+
+        @Override
+        public void onClick(View v) {
+            showDeleteDialog(position, listName, userId, listId);
+        }
+    }
+
+    private void showDeleteDialog(final int position, final String listName, final String userID, final String listID) {
+        final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = this.getLayoutInflater();
+        //final View dialogView = inflater.inflate(R.layout.layout_add_list_dialog, null, false);
+        //dialogBuilder.setView(dialogView);
+        final boolean[] last = {false};
+
+        dialogBuilder.setTitle(getResources().getString(R.string.delete_message) + " \"" + listName + "\"?");
+        final DatabaseReference listRef = mDatabaseReference.child(LISTS).child(listID);
+        listRef.child(USERS).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getChildrenCount() == 1) {
+                    dialogBuilder.setMessage(getResources().getString(R.string.full_list_delete_message));
+                    last[0] = true;
+                }
+                //put everything here?!
+                AlertDialog b = dialogBuilder.create();
+                b.show();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        dialogBuilder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                if (last[0]) {
+
+                    listRef.child(ITEMS).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            for (DataSnapshot item: dataSnapshot.getChildren()) {
+                                String itemID = null;
+                                for (DataSnapshot d: item.getChildren()) {
+                                    if (d.getKey().equals("itemID"))
+                                        itemID = d.getValue().toString();
+                                    }
+                                if (itemID != null) {
+                                    Log.d("RROI", mDatabaseReference.child(ITEMS).child(itemID).toString());
+                                    mDatabaseReference.child(ITEMS).child(itemID).setValue(null);
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+
+                    Log.d("RROI", "delete " + listRef);
+
+                    listRef.setValue(null);
+                } else {
+                    listRef.child(USERS).child(userID).removeValue();
+                }
+
+                DatabaseReference ref = mDatabaseReference.child(USERS).child(userID).child(LISTS);
+                Query queryRef = ref.getRef().orderByChild("listID").equalTo(listID);
+                queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        Log.d("RROI", "l " + dataSnapshot.getChildren().iterator().next().getRef());
+                        dataSnapshot.getChildren().iterator().next().getRef().setValue(null);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
+
+
+                Toast.makeText(MainActivity.this, listName + " deleted", Toast.LENGTH_SHORT).show();
+
+            }
+        });
+        dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                //do nothing, just close this dialog
+            }
+        });
+
+    }
 
 
     /**

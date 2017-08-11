@@ -21,12 +21,13 @@ public class ListHolder extends RecyclerView.ViewHolder {
 
     public final TextView mListNameField;
 
-    private final ImageButton mImageButtonShare;
+    private final ImageButton mImageButtonShare, mImageButtonDelete;
 
     public ListHolder(View itemView) {
         super(itemView);
         this.mListNameField = (TextView) itemView.findViewById(R.id.tv_list_name);
         mImageButtonShare = (ImageButton) itemView.findViewById(R.id.ib_share);
+        mImageButtonDelete = (ImageButton) itemView.findViewById(R.id.ib_delete);
 
     }
 
@@ -38,10 +39,12 @@ public class ListHolder extends RecyclerView.ViewHolder {
         mListNameField.setTextSize(size + 10);
     }
 
-
-
     public void setShareOnClick(View.OnClickListener onClick){
         mImageButtonShare.setOnClickListener(onClick);
+    }
+
+    public void setDeleteOnClick(View.OnClickListener onClick){
+        mImageButtonDelete.setOnClickListener(onClick);
     }
 
 }

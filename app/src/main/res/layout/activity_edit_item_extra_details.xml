@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical" android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- EditText for getting task description input -->
+        <EditText
+            android:id="@+id/et_edit_item_brand"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            android:hint="@string/edit_item_brand_description"
+            android:paddingBottom ="@dimen/activity_horizontal_margin"/>
+
+        <!-- EditText for getting task description input -->
+        <EditText
+            android:id="@+id/et_edit_item_weight"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            android:hint="@string/edit_item_weight_description"
+            android:paddingBottom ="@dimen/activity_horizontal_margin"/>
+
+    </LinearLayout>
