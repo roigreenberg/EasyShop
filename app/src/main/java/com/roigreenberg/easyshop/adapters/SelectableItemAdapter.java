@@ -1,11 +1,10 @@
-package com.roigreenberg.easyshop;
+package com.roigreenberg.easyshop.adapters;
 
-import android.content.Context;
 import android.util.SparseBooleanArray;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
+import com.roigreenberg.easyshop.models.ItemInList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,7 +69,7 @@ public abstract class SelectableItemAdapter extends FirebaseRecyclerAdapter<Item
 
     /**
      * Indicates the list of selected items
-     * @return SList of selected items ids
+     * @return ShoppingList of selected items ids
      */
     public List<Integer> getSelectedItems() {
         List<Integer> items = new ArrayList<>(selectedItems.size());

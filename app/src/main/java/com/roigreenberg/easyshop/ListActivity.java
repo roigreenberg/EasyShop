@@ -3,7 +3,6 @@ package com.roigreenberg.easyshop;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
@@ -12,18 +11,11 @@ import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
-import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
@@ -34,6 +26,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.roigreenberg.easyshop.adapters.ItemAdapter;
+import com.roigreenberg.easyshop.models.ShoppingList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,7 +84,7 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
         listRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                final SList listData = dataSnapshot.getValue(SList.class);
+                final ShoppingList listData = dataSnapshot.getValue(ShoppingList.class);
                 setTitle(listData.getListName());
                 //listData.setItemTouchHelper(listHolder, LISTS);
                 //listHolder.setNameSize(mTextSize);

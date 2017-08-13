@@ -9,17 +9,17 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity android:userName=".MainActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:userName="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:userName="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
+                <action android:userName="android.intent.action.VIEW" />
 
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:userName="android.intent.category.DEFAULT" />
+                <category android:userName="android.intent.category.BROWSABLE" />
 
                 <data
                     android:host="easyshop.roigreenberg.com"
@@ -32,27 +32,27 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".AddItemActivity"
+            android:userName=".AddItemActivity"
             android:label="@string/add_item_activity_name"
             android:windowSoftInputMode="stateAlwaysVisible"/>
         <activity
-            android:name=".EditItemActivity"
+            android:userName=".EditItemActivity"
             android:label="@string/add_item_activity_name"
             android:windowSoftInputMode="stateAlwaysVisible"/>
         <activity
-            android:name=".SettingsActivity"
+            android:userName=".SettingsActivity"
             android:label="@string/title_activity_settings"
             android:parentActivityName=".MainActivity">
             <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
+                android:userName="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
         <activity
-            android:name=".ListActivity"
+            android:userName=".ListActivity"
             android:label="@string/title_activity_list"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
+                android:userName="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
     </application>

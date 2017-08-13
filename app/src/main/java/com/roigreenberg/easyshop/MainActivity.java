@@ -28,13 +28,8 @@ import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.appinvite.AppInvite;
-import com.google.android.gms.appinvite.AppInviteInvitation;
-import com.google.android.gms.appinvite.AppInviteInvitationResult;
-import com.google.android.gms.appinvite.AppInviteReferral;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.appinvite.FirebaseAppInvite;
 import com.google.firebase.auth.FirebaseAuth;
@@ -51,9 +46,10 @@ import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.roigreenberg.easyshop.models.ListForUser;
+import com.roigreenberg.easyshop.models.ShoppingList;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Arrays;
 
@@ -213,7 +209,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 listsRef.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        final SList listData = dataSnapshot.getValue(SList.class);
+                        final ShoppingList listData = dataSnapshot.getValue(ShoppingList.class);
                         String listName = listData.getListName();
                         if (listName == null)
                             listName = "name is missing";
@@ -309,12 +305,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     Toast.makeText(MainActivity.this, "Please input some texts!", Toast.LENGTH_SHORT).show();
                 } else {
 
-                    //add new item name to SList
+                    //add new item name to ShoppingList
                     DatabaseReference ref = mDatabaseReference.child(LISTS).push();
-                    ref.setValue(new SList(ref.getKey(), editText.getText().toString().trim()));
+                    ref.setValue(new ShoppingList(editText.getText().toString().trim(), timestampLastChanged));
                     ref.child(USERS).child(mUserID).setValue("admin");
 
-                    DatabaseReference userRef = mDatabaseReference.child(USERS).child(mUserID).child(LISTS).push();
+                    DatabaseReference userRef = mDatabaseReference.child(USERS).child(mUserID)
+                            .child(LISTS).child(ref.getKey());
                     userRef.setValue(new ListForUser(ref.getKey()));
 
 
@@ -372,7 +369,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                                     if (dataSnapshot.getValue() == null) {
                                         Toast.makeText(MainActivity.this, "List not exists!", Toast.LENGTH_SHORT).show();
                                     } else {
-                                        //add new item name to SList
+                                        //add new item name to ShoppingList
                                         final DatabaseReference  userRef = mDatabaseReference.child(USERS).child(mUserID).child(LISTS);
                                         userRef.orderByChild("listID").equalTo(listID).addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override

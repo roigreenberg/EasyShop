@@ -1,4 +1,4 @@
-package com.roigreenberg.easyshop;
+package com.roigreenberg.easyshop.adapters;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -9,14 +9,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.NumberPicker;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -24,9 +19,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+import com.roigreenberg.easyshop.R;
+import com.roigreenberg.easyshop.models.Item;
+import com.roigreenberg.easyshop.models.ItemInList;
 
 import static com.roigreenberg.easyshop.ListActivity.isSelectionMode;
 import static com.roigreenberg.easyshop.MainActivity.ITEMS;
@@ -342,7 +337,7 @@ public  class ItemAdapter extends SelectableItemAdapter {
 
             dialogBuilder.setPositiveButton("Done", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
-                    //add new item name to SList
+                    //add new item name to ShoppingList
                     DatabaseReference ref = itemInListRef.child("quantity");
                     ref.setValue(Long.toString(numberPicker.getValue()));
 

@@ -11,6 +11,8 @@ import android.widget.Toast;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.roigreenberg.easyshop.models.Item;
+import com.roigreenberg.easyshop.models.ItemInList;
 
 import static com.roigreenberg.easyshop.MainActivity.ITEMS;
 import static com.roigreenberg.easyshop.MainActivity.mUsername;

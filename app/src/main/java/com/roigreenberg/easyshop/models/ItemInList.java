@@ -1,4 +1,4 @@
-package com.roigreenberg.easyshop;
+package com.roigreenberg.easyshop.models;
 
 /**
  * Created by Roi on 09/06/2017.
