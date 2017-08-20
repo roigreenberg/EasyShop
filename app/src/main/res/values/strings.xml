@@ -21,8 +21,23 @@
 
     <!-- Default for size preference -->
     <string name="pref_size_default" translatable="false">15</string>
-    <string name="title_activity_list">ListActivity</string>
-    <string name="share_list">Share list</string>
+    <string name="title_activity_list" translatable="false">ListActivity</string>
+    <string name="share_list" translatable="false">Share list</string>
+
+    <string name="assign_to">Assign to</string>
+    <string name="add_item_extra_details_text">Show extra details</string>
+    <string name="Extra_details">Extra Details</string>
+    <string name="tv_expand_extra_details">Show extra details..</string>
+    <string name="tv_collaps_extra_details">Hide extra details..</string>
+    <string name="remove_from_list">Remove from list</string>
+    <string name="add_to_list">Add to list</string>
+    <string name="delete_message">Are you sure you want to delete</string>
+    <string name="full_list_delete_message">Note: You are the only user. The list will erase from database.</string>
+    <string name="item_name" translatable="false">Name</string>
+    <string name="item_quantity" translatable="false">Quantity</string>
+    <string name="item_assignee" translatable="false">Assignee</string>
+    <string name="edit_apply_button">Apply</string>
+    <string name="edit_item">Edit</string>
 
 
 </resources>

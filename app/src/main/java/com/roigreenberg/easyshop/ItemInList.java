@@ -11,11 +11,14 @@ public class ItemInList {
     private String mState;
     private String mAssignee;
 
-    public ItemInList(String mItemID, String mQuantity, String mState, String mAssignee) {
+    private String mName;
+
+    public ItemInList(String mItemID, String mQuantity, String mState, String mAssignee, String mName) {
         this.mItemID = mItemID;
         this.mQuantity = mQuantity;
         this.mState = mState;
         this.mAssignee = mAssignee;
+        this.mName = mName;
     }
 
     public ItemInList() {
@@ -52,4 +55,13 @@ public class ItemInList {
     public void setAssignee(String mAsignee) {
         this.mAssignee = mAsignee;
     }
+
+    public String getName() {
+        return mName;
+    }
+
+    public void setName(String mName) {
+        this.mName = mName;
+    }
+
 }
