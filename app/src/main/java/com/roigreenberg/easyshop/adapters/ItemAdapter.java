@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.graphics.Paint;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,8 +21,11 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.roigreenberg.easyshop.R;
+import com.roigreenberg.easyshop.models.ActionLog;
 import com.roigreenberg.easyshop.models.Item;
 import com.roigreenberg.easyshop.models.ItemInList;
+
+import java.util.Date;
 
 import static com.roigreenberg.easyshop.ListActivity.isSelectionMode;
 import static com.roigreenberg.easyshop.MainActivity.ITEMS;
@@ -99,8 +103,9 @@ public  class ItemAdapter extends SelectableItemAdapter {
         private final TextView mBrand;
         private final TextView mWeight;
         private final TextView mVolume;
-        private final TextView mAssignee;
+
         private final TextView mQuantity;
+        private final TextView last_action;
         //private final TextView mBarcode;
         //private final TextView[] mImage;
         private final TextView mExtraDetails;
@@ -125,7 +130,7 @@ public  class ItemAdapter extends SelectableItemAdapter {
             this.mWeight = (TextView) itemView.findViewById(R.id.tv_item_weight_volume);
             this.mVolume = (TextView) itemView.findViewById(R.id.tv_item_weight_volume);
             //this.mBarcode = (TextView) itemView.findViewById(R.id.tv_list_name);
-            this.mAssignee = (TextView) itemView.findViewById(R.id.tv_item_assignee);
+            this.last_action = (TextView) itemView.findViewById(R.id.tv_item_last_action);
             this.mQuantity = (TextView) itemView.findViewById(R.id.tv_item_quantity);
             this.mQuantity.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -133,6 +138,7 @@ public  class ItemAdapter extends SelectableItemAdapter {
                     showQuantityDialog();
                 }
             });
+
             this.mExtraDetails = (TextView) itemView.findViewById(R.id.tv_item_extra_details);
             this.mExtraDetails.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -162,6 +168,7 @@ public  class ItemAdapter extends SelectableItemAdapter {
         public void bindItem(DataSnapshot dataSnapshot, DatabaseReference itemInListRef, ItemInList itemInList, boolean done, float textSize, boolean isSelected){
             itemsRef = dataSnapshot.getRef();
             Item item = dataSnapshot.getValue(Item.class);
+            ActionLog last_action = itemInList.getLastLog();
             doneList = done;
             this.itemInListRef = itemInListRef;
             Log.d("RROI", "" + item.getName());
@@ -170,7 +177,11 @@ public  class ItemAdapter extends SelectableItemAdapter {
             isWeight = setWeight(item.getWeight());
 
             setVolume(item.getVolume());
-            setAssignee(itemInList.getAssignee());
+
+            if (last_action != null)
+                setLastAction(last_action.getAction() + " by " + last_action.getUserName() + " at " + DateFormat.format("MM/dd/yyyy HH:mm", new Date(last_action.getTimestampLong())).toString());
+            else
+                setLastAction(itemInList.getAssignee());
             if (itemInList.getQuantity() == null)
                 itemInList.setQuantity("1");
             current_quantity = Integer.parseInt(itemInList.getQuantity());
@@ -179,7 +190,7 @@ public  class ItemAdapter extends SelectableItemAdapter {
             setNameSize(textSize);
             setBrandSize(textSize);
             setVolumeSize(textSize);
-            setAssigneeSize(textSize);
+            setLastActionSize(textSize);
             if (isSelected) {
                 itemView.setBackgroundResource(R.color.selectedItem);
             } else {
@@ -258,9 +269,9 @@ public  class ItemAdapter extends SelectableItemAdapter {
                 mVolume.setText(value);
         }
 
-        public void setAssignee(String value) {
+        public void setLastAction(String value) {
             if (value != null)
-                mAssignee.setText(value);
+                last_action.setText(value);
         }
 
         public void setQuantity(String value) {
@@ -290,8 +301,8 @@ public  class ItemAdapter extends SelectableItemAdapter {
             mVolume.setTextSize(size);
         }
 
-        public void setAssigneeSize(Float size) {
-            mAssignee.setTextSize(size);
+        public void setLastActionSize(Float size) {
+            last_action.setTextSize(size);
         }
 
         @Override

@@ -1,32 +1,32 @@
 <resources>
-    <string userName="app_name">איזי-שופ</string>
-    <string userName="add_new_list">הוסף רשימה חדשה</string>
-    <string userName="sign_out">התנתק</string>
-    <string userName="edit_item_name_description">שם</string>
-    <string userName="edit_item_brand_description">מותג..</string>
-    <string userName="edit_item_weight_description">משקל/נפח..</string>
-    <string userName="add_button">ADD</string>
-    <string userName="add_item_activity_name">הוסף מוצג חדש</string>
-    <string userName="share">Share</string>
-    <string userName="action_settings">הגדרות</string>
-    <string userName="title_activity_settings">הגדרות</string>
+    <string name="app_name">איזי-שופ</string>
+    <string name="add_new_list">הוסף רשימה חדשה</string>
+    <string name="sign_out">התנתק</string>
+    <string name="edit_item_name_description">שם</string>
+    <string name="edit_item_brand_description">מותג..</string>
+    <string name="edit_item_weight_description">משקל/נפח..</string>
+    <string name="add_button">ADD</string>
+    <string name="add_item_activity_name">הוסף מוצג חדש</string>
+    <string name="share">Share</string>
+    <string name="action_settings">הגדרות</string>
+    <string name="title_activity_settings">הגדרות</string>
 
     <!-- Strings related to Settings -->
 
     <!-- Label for the size preference -->
-    <string userName="pref_size_label">גודל</string>
+    <string name="pref_size_label">גודל</string>
 
-    <string userName="assign_to">הקצאה</string>
-    <string userName="add_item_extra_details_text">פרטים נוספים..</string>
-    <string userName="Extra_details">פרטים נוספים</string>
-    <string userName="tv_expand_extra_details">פרטים נוספים..</string>
-    <string userName="tv_collaps_extra_details">סגור..</string>
-    <string userName="remove_from_list">הסר מהרשימה</string>
-    <string userName="add_to_list">הוסף לרשימה</string>
-    <string userName="delete_message">האם אתה בטוח שברצונך למחוק</string>
-    <string userName="full_list_delete_message">שים לב: אתה המשתמש היחיד. הרשימה תוסר ממאגר הנתונים.</string>
-    <string userName="edit_apply_button">אישור</string>
-    <string userName="edit_item">ערוך</string>
+    <string name="assign_to">הקצאה</string>
+    <string name="add_item_extra_details_text">פרטים נוספים..</string>
+    <string name="Extra_details">פרטים נוספים</string>
+    <string name="tv_expand_extra_details">פרטים נוספים..</string>
+    <string name="tv_collaps_extra_details">סגור..</string>
+    <string name="remove_from_list">הסר מהרשימה</string>
+    <string name="add_to_list">הוסף לרשימה</string>
+    <string name="delete_message">האם אתה בטוח שברצונך למחוק</string>
+    <string name="full_list_delete_message">שים לב: אתה המשתמש היחיד. הרשימה תוסר ממאגר הנתונים.</string>
+    <string name="edit_apply_button">אישור</string>
+    <string name="edit_item">ערוך</string>
 
 
 </resources>

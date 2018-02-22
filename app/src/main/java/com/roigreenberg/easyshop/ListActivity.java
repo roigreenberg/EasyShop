@@ -72,12 +72,11 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
         mRecyclerView.setNestedScrollingEnabled(false);
        // mRecyclerView.setHasFixedSize(false);
         RecyclerView.LayoutManager ownLayoutManager = new LinearLayoutManager
-                (this, LinearLayoutManager.VERTICAL, false);
+                (this, LinearLayoutManager.VERTICAL, true);
         ownLayoutManager.setAutoMeasureEnabled(true);
         mRecyclerView.setLayoutManager(ownLayoutManager);
-
         listRef = FirebaseDatabase.getInstance().getReference().child(LISTS).child(listID);
-        itemAdapter = new ItemAdapter(this, listRef.child(ITEMS).orderByChild("name"), this, false);
+        itemAdapter = new ItemAdapter(this, listRef.child(ITEMS).orderByChild("lastLog/timestamp/timestamp"), this, false);
 
         mRecyclerView.setAdapter(itemAdapter);
 
@@ -103,7 +102,7 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
         //mDoneRecyclerView.setHasFixedSize(false);
         mDoneRecyclerView.setNestedScrollingEnabled(false);
         RecyclerView.LayoutManager doneLayoutManager = new LinearLayoutManager
-                (this, LinearLayoutManager.VERTICAL, false);
+                (this, LinearLayoutManager.VERTICAL, true);
         doneLayoutManager.setAutoMeasureEnabled(true);
         mDoneRecyclerView.setLayoutManager(doneLayoutManager);
 
@@ -323,7 +322,7 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
             });
             /*final Spinner userSpinner = (Spinner) menu.findItem(R.id.menu_users_spinner).getActionView();
             if (userSpinner == null)
-                Log.e("RROI", "userSpinner in null");
+                ActionLog.e("RROI", "userSpinner in null");
             listRef.child(USERS).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -337,13 +336,13 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
                     for (DataSnapshot userSnapshot: dataSnapshot.getChildren()) {
                         //String userName = userSnapshot.child("Name").getValue(String.class);
                         String userID = userSnapshot.getKey();
-                        Log.d("RROI", userID);
+                        ActionLog.d("RROI", userID);
                         usersDatabaseReference.child(userID).addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 String userName = dataSnapshot.child("Name").getValue(String.class);
                                 if (userName != null) {
-                                    Log.d("RROI", userName);
+                                    ActionLog.d("RROI", userName);
                                     users.add(userName);
                                 }
                             }
@@ -371,15 +370,15 @@ public class ListActivity extends AppCompatActivity implements ItemAdapter.ItemH
             userSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    Log.e("RROI", "on spinner");
+                    ActionLog.e("RROI", "on spinner");
                     for (int i = mRecyclerView.getAdapter().getItemCount() - 1; i >= 0; i--) {
                         ItemAdapter.ItemHolder itemHolder = (ItemAdapter.ItemHolder) mRecyclerView.findViewHolderForAdapterPosition(i);
                         if (((ItemAdapter) mRecyclerView.getAdapter()).isSelected(i)){
 
-                            Log.d("RROI", ((ItemAdapter) mRecyclerView.getAdapter()).getRef(i).toString());
+                            ActionLog.d("RROI", ((ItemAdapter) mRecyclerView.getAdapter()).getRef(i).toString());
                         }
                     }
-                    Log.d(TAG, "menu_spinner");
+                    ActionLog.d(TAG, "menu_spinner");
                     mode.finish();
                 }
 

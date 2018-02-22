@@ -40,18 +40,22 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
 import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.roigreenberg.easyshop.models.ActionLog;
 import com.roigreenberg.easyshop.models.ListForUser;
 import com.roigreenberg.easyshop.models.ShoppingList;
+import com.roigreenberg.easyshop.utils.Constants;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Arrays;
+import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -118,7 +122,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         mOwnListsRecyclerView.setLayoutManager(ownLayoutManager);
 
         //DatabaseReference mUserListsRef = FirebaseDatabase.getInstance().getReference().child("Users");
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+//        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         mAuthStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
@@ -301,13 +305,17 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         dialogBuilder.setPositiveButton("Done", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
-                if (editText.getText().toString().trim().equals("")) {
+                String listName = editText.getText().toString().trim();
+                if (listName.equals("")) {
                     Toast.makeText(MainActivity.this, "Please input some texts!", Toast.LENGTH_SHORT).show();
                 } else {
+                    ActionLog createNewListLog = new ActionLog(mUsername, "Create", listName);
+                    HashMap<String, Object> timestampCreated = new HashMap<>();
+                    timestampCreated.put(Constants.FIREBASE_PROPERTY_TIMESTAMP, ServerValue.TIMESTAMP);
 
                     //add new item name to ShoppingList
                     DatabaseReference ref = mDatabaseReference.child(LISTS).push();
-                    ref.setValue(new ShoppingList(editText.getText().toString().trim(), timestampLastChanged));
+                    ref.setValue(new ShoppingList(listName, timestampCreated));
                     ref.child(USERS).child(mUserID).setValue("admin");
 
                     DatabaseReference userRef = mDatabaseReference.child(USERS).child(mUserID)

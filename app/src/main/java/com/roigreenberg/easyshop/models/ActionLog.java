@@ -1,5 +1,6 @@
 package com.roigreenberg.easyshop.models;
 
+import com.google.firebase.database.Exclude;
 import com.google.firebase.database.ServerValue;
 import com.roigreenberg.easyshop.utils.Constants;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -10,15 +11,15 @@ import java.util.HashMap;
  * Created by Roi on 13/08/2017.
  */
 
-public class Log {
+public class ActionLog {
     private String userName;
     private String action;
     private String itemName;
     private HashMap<String, Object> timestamp;
 
-    public Log() {}
+    public ActionLog() {}
 
-    public Log(String userName, String action, String itemName) {
+    public ActionLog(String userName, String action, String itemName) {
         this.userName = userName;
         this.action = action;
         this.itemName = itemName;
@@ -47,7 +48,7 @@ public class Log {
         return timestamp;
     }
 
-    @JsonIgnore
+    @Exclude
     public long getTimestampLong() {
 
         return (long) timestamp.get(Constants.FIREBASE_PROPERTY_TIMESTAMP);

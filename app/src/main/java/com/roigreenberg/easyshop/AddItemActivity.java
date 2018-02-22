@@ -78,7 +78,7 @@ public class AddItemActivity extends AppCompatActivity {
         Toast.makeText(this, "add " + itemName + " " + itemBrand + " " + itemWeight, Toast.LENGTH_LONG).show();
 
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child(ITEMS).push();
-        ref.setValue(new Item(ref.getKey(), itemName, itemBrand, itemWeight, null, null, null));
+        ref.setValue(new Item(ref.getKey(), itemName, itemBrand, itemWeight, null, null, null, null, null, null, null));
         //ref.child(USERS).child(mUserID).setValue("admin");
 
         DatabaseReference listRef = databaseReference.child(ITEMS).push();

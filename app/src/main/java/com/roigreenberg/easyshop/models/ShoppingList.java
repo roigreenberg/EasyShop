@@ -1,8 +1,5 @@
 package com.roigreenberg.easyshop.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.roigreenberg.easyshop.utils.Constants;
-
 import java.util.HashMap;
 
 /**
@@ -12,12 +9,12 @@ import java.util.HashMap;
 public class ShoppingList {
 
     private String mListName;
-    private HashMap<String, Log> logLastChanged;
+    private HashMap<String, Object> logLastChanged;
 
     public ShoppingList() {
     }
 
-    public ShoppingList(String mListName, HashMap<String, Log> logLastChanged) {
+    public ShoppingList(String mListName, HashMap<String, Object> logLastChanged) {
         this.mListName = mListName;
         this.logLastChanged = logLastChanged;
     }
@@ -29,17 +26,17 @@ public class ShoppingList {
     public void setListName(String mListName) { this.mListName = mListName; }
 
 
-    public HashMap<String, Log> getLogLastChanged() {
+    public HashMap<String, Object> getLogLastChanged() {
         return logLastChanged;
     }
 
    /* @JsonIgnore
-    public Log setLogLastChangedLog() {
+    public ActionLog setLogLastChangedLog() {
 
-        return (Log) logLastChanged.get(Constants.FIREBASE_PROPERTY_TIMESTAMP);
+        return (ActionLog) logLastChanged.get(Constants.FIREBASE_PROPERTY_TIMESTAMP);
     } */
 
-    public void setLogLastChanged(HashMap<String, Log> logLastChanged) {
+    public void setLogLastChanged(HashMap<String, Object> logLastChanged) {
         this.logLastChanged = logLastChanged;
     }
 }

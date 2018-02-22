@@ -12,6 +12,7 @@ public class ItemInList {
     private String mAssignee;
 
     private String mName;
+    private ActionLog lastLog;
 
     public ItemInList(String mItemID, String mQuantity, String mState, String mAssignee, String mName) {
         this.mItemID = mItemID;
@@ -19,7 +20,9 @@ public class ItemInList {
         this.mState = mState;
         this.mAssignee = mAssignee;
         this.mName = mName;
+        this.lastLog = new ActionLog(mAssignee, "created", mName);
     }
+
 
     public ItemInList() {
     }
@@ -64,4 +67,11 @@ public class ItemInList {
         this.mName = mName;
     }
 
+    public ActionLog getLastLog() {
+        return lastLog;
+    }
+
+    public void setLastLog(ActionLog lastLog) {
+        this.lastLog = lastLog;
+    }
 }
