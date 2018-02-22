@@ -29,6 +29,7 @@ import java.util.Date;
 
 import static com.roigreenberg.easyshop.ListActivity.isSelectionMode;
 import static com.roigreenberg.easyshop.MainActivity.ITEMS;
+import static com.roigreenberg.easyshop.MainActivity.mUsername;
 
 /**
  * Created by Roi on 16/06/2017.
@@ -73,11 +74,13 @@ public  class ItemAdapter extends SelectableItemAdapter {
                     public void onClick(View v) {
                         if (done) {
                             Log.e("RROI", "cb->uncheck "  + itemInListRef.toString());
+                            item.setLastLog(new ActionLog(mUsername, "add to list", item.getName()));
                             itemInListRef.getParent().getParent().child("Items").push().setValue(item);
                             itemInListRef.removeValue();
 
                         } else {
                             Log.e("RROI", "cb->check " + itemInListRef.toString());
+                            item.setLastLog(new ActionLog(mUsername, "bought", item.getName()));
                             itemInListRef.getParent().getParent().child("DoneItems").push().setValue(item);
                             itemInListRef.removeValue();
                         }
